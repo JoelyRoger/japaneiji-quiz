@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Japanese Quiz 👺</title>
+<style>
+:root{color-scheme:dark;
+  --bg:#0d1526; --card:#162039; --ink:#e9edf7; --muted:#93a1c2;
+  --line:#283651; --accent:#5b8cff; --accent2:#2dd4bf;
+  --good:#34d39f; --goodbg:#10291f; --half:#e6b450; --halfbg:#2c2613;
+  --bad:#fb7185; --badbg:#2e1726; --chip:#1d2a48;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.jp{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","YuGothic","Meiryo","MS PGothic","Noto Sans JP",sans-serif;}
+.wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px;}
+h1{font-size:22px;margin:4px 0 2px;letter-spacing:.2px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.35);}
+.hidden{display:none!important}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:11px;
+  padding:12px 20px;font-size:16px;font-weight:600;}
+.btn:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn.sm{padding:8px 13px;font-size:14px;border-radius:9px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+
+/* menu */
+.section-title{font-size:13px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);margin:22px 0 10px}
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:9px}
+.topic{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+  border-radius:11px;padding:10px 12px;background:var(--card);cursor:pointer;user-select:none}
+.topic:hover{border-color:var(--accent)}
+.topic .mark{width:24px;height:24px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border:2px solid #cbd5ee;border-radius:6px;background:#ffffff;color:#1f4fd6;font-weight:900;font-size:16px;line-height:1}
+.topic.sel{border-color:var(--accent);background:var(--chip)}
+.topic.sel .mark{background:var(--accent);border-color:var(--accent);color:#ffffff}
+.topic .tn{font-weight:600;font-size:14.5px}
+.topic .tj{color:var(--muted);font-size:12.5px}
+.topic .tc{margin-left:auto;color:var(--muted);font-size:12px;background:var(--chip);
+  border-radius:20px;padding:2px 9px}
+.topic.empty{opacity:.45}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.seg label{padding:9px 14px;font-size:14px;cursor:pointer;background:var(--card)}
+.seg input{display:none}
+.seg label.on{background:var(--accent);color:#fff}
+select{font:inherit;padding:9px 11px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink)}
+.hint{color:var(--muted);font-size:13px;line-height:1.55}
+
+/* quiz */
+.progress{height:8px;background:var(--chip);border-radius:20px;overflow:hidden;margin:2px 0 16px}
+.progress > i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+.qtop{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13.5px;margin-bottom:6px}
+.chip{background:var(--chip);border-radius:20px;padding:3px 11px;font-size:12.5px;color:var(--muted)}
+.qhead{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.hinttoggle{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none;border:1px solid var(--line);border-radius:20px;padding:4px 11px}
+.hinttoggle:hover{border-color:var(--accent)}
+.hinttoggle .hbox{width:15px;height:15px;border-radius:4px;border:2px solid var(--muted);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:#1f4fd6;font-weight:900;font-size:11px;line-height:1}
+.hinttoggle.on{color:var(--accent);border-color:var(--accent)}
+.hinttoggle.on .hbox{background:var(--accent);border-color:var(--accent);color:#fff}
+.ask{color:var(--muted);font-size:15px;margin:18px 0 6px;text-align:center}
+.prompt{text-align:center;margin:6px 0 20px;word-break:break-word;line-height:1.25}
+.prompt.kana{font-size:clamp(60px,17vw,128px);font-weight:600}
+.prompt.kana.long{font-size:clamp(30px,7.5vw,52px)}
+.prompt.en{font-size:clamp(30px,7vw,50px);font-weight:600}
+.answer-in{width:100%;font-size:22px;padding:14px 16px;border-radius:12px;
+  border:2px solid var(--line);background:var(--card);color:var(--ink);text-align:center}
+.answer-in:focus{outline:none;border-color:var(--accent)}
+.fb{margin-top:16px;border-radius:12px;padding:14px 16px;border:1px solid var(--line)}
+.fb.good{background:var(--goodbg);border-color:#1f5a44}
+.fb.half{background:var(--halfbg);border-color:#5c4a1e}
+.fb.bad{background:var(--badbg);border-color:#6e2740}
+.fb .verdict{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+.fb .detail{margin-top:9px;font-size:15px;line-height:1.6}
+.fb .detail b{font-weight:700}
+.fb .ja{font-size:22px}
+.adjust{display:flex;align-items:center;gap:7px;margin-top:13px;flex-wrap:wrap}
+.adjust .lbl{font-size:12.5px;color:var(--muted);margin-right:2px}
+.hintrow{display:flex;gap:8px;margin-top:12px}
+.hint-in{flex:1;min-width:0;font-size:13.5px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.hint-in:focus{outline:none;border-color:var(--accent)}
+#qhintText{text-align:center;color:var(--half);font-size:15.5px;margin:-6px 0 14px;line-height:1.45}
+.mk{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--ink)}
+.mk.on.full{background:var(--good);color:#fff;border-color:var(--good)}
+.mk.on.half{background:var(--half);color:#fff;border-color:var(--half)}
+.mk.on.zero{background:var(--bad);color:#fff;border-color:var(--bad)}
+/* kanji quiz */
+.kqfields{display:flex;flex-direction:column;gap:13px;margin:4px 0 2px}
+.kqf{display:flex;flex-direction:column;gap:6px}
+.kqlbl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fb .parts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.fb .pchip{font-size:13px;border-radius:8px;padding:4px 10px;border:1px solid var(--line);font-weight:600}
+.fb .pchip.ok{background:var(--goodbg);border-color:#1f5a44;color:var(--good)}
+.fb .pchip.hf{background:var(--halfbg);border-color:#5c4a1e;color:var(--half)}
+.fb .pchip.no{background:var(--badbg);border-color:#6e2740;color:var(--bad)}
+/* conjugation quiz */
+.csent{text-align:center;font-size:clamp(23px,5vw,34px);font-weight:600;line-height:1.3;margin:10px 0 4px}
+.clabelwrap{text-align:center;margin:2px 0 16px}
+.creg{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-radius:20px;padding:4px 13px;display:inline-block}
+.creg.polite{color:#7dd3fc;background:#0b2738;border:1px solid #1e5a7a}
+.creg.casual{color:#fcd34d;background:#2c2613;border:1px solid #5c4a1e}
+
+
+
+/* results */
+.score-big{font-size:54px;font-weight:800;letter-spacing:.5px}
+.score-sub{color:var(--muted);font-size:15px}
+.bar{height:14px;border-radius:20px;background:var(--chip);overflow:hidden;margin:14px 0 6px}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.tscroll{overflow-x:auto}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+tr.full td:first-child{box-shadow:inset 3px 0 var(--good)}
+tr.half td:first-child{box-shadow:inset 3px 0 var(--half)}
+tr.zero td:first-child{box-shadow:inset 3px 0 var(--bad)}
+td .miss{color:var(--bad)}
+td .ok{color:var(--good)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;margin-top:10px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ MENU ============ -->
+  <div id="menu">
+    <h1>日本語クイズ &nbsp;·&nbsp; Japanese Quiz 👺</h1>
+    <p class="sub">From your lessons with Eiji Sensei. Pick your topics and test yourself both ways.</p>
+
+    <div class="card">
+      <div class="row spread">
+        <div class="section-title" style="margin:0">Topics to test</div>
+        <div class="row">
+          <button class="btn ghost sm" id="selAll">Select all</button>
+          <button class="btn ghost sm" id="selNone">Clear</button>
+        </div>
+      </div>
+      <div class="topics" id="topics" style="margin-top:12px"></div>
+
+      <div class="section-title">When added</div>
+      <div class="topics" id="batches"></div>
+
+      <div class="section-title">Direction</div>
+      <div class="seg" id="dirSeg">
+        <label data-d="both" class="on"><input type="radio" name="dir" value="both" checked>Both ways</label>
+        <label data-d="j2e"><input type="radio" name="dir" value="j2e">Japanese → English</label>
+        <label data-d="e2j"><input type="radio" name="dir" value="e2j">English → Japanese</label>
+      </div>
+
+      <div class="section-title">Round length</div>
+      <div class="row">
+        <select id="length">
+          <option value="0">All selected</option>
+          <option value="10">10 questions</option>
+          <option value="20">20 questions</option>
+          <option value="30">30 questions</option>
+          <option value="50">50 questions</option>
+        </select>
+        <span class="hint" id="poolInfo"></span>
+      </div>
+
+      <div class="section-title">Options</div>
+      <div class="topic" id="optWords" style="max-width:430px;margin-bottom:4px"><span class="mark"></span><span><span class="tn">Words only</span><br><span class="tj">Skip full sentences — single words and short terms only</span></span></div>
+      <div class="topic" id="optSmart" style="max-width:430px;margin-bottom:4px"><span class="mark"></span><span><span class="tn">Smart review</span><br><span class="tj">Deal me the words I keep missing — remembers between sessions</span></span></div>
+      <div class="hint" style="margin-top:2px;margin-bottom:4px"><a id="statReset" href="#" style="color:var(--muted)">reset smart-review memory</a></div>
+
+      <div style="margin-top:22px" class="row spread">
+        <span class="hint">Half a point for a one-letter slip. Romaji accepts shi/si, tsu/tu, fu/hu, etc.</span>
+        <button class="btn" id="start">Start quiz →</button>
+      </div>
+
+      <div style="margin-top:10px" class="row spread">
+        <span class="hint" id="kanjiInfo">漢字 recognition — see the kanji, type reading + meaning</span>
+                <button class="btn" id="startKanji" style="background:var(--accent2);color:#062b25">Start Kanji Quiz 漢字 →</button>
+      </div>
+
+      <div class="section-title">Conjugation verbs &nbsp;<span style="font-weight:400;text-transform:none;letter-spacing:0">(活用 quiz — English → romaji)</span></div>
+      <div class="topics" id="conjverbs"></div>
+      <div style="margin-top:12px" class="row spread">
+        <span class="hint" id="conjInfo">Tick verbs to focus, or hit 🎲 All random for any verb. Each sentence is tagged polite or casual.</span>
+        <div class="row">
+          <button class="btn ghost sm" id="startConj" style="border-color:#a78bfa;color:#c4b5fd">Start Conjugation 活用 →</button>
+          <button class="btn" id="conjRandom" style="background:#a78bfa;color:#1a1430">🎲 All random</button>
+        </div>
+      </div>
+    </div>
+    <footer>Tip: in <b>Both ways</b> mode every word is asked twice — once reading it (type the English), once recalling it (type the romaji).</footer>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div id="quiz" class="hidden">
+    <div class="qtop">
+      <span id="qcount"></span>
+      <span>Score: <b id="qscore">0</b></span>
+    </div>
+    <div class="progress"><i id="qbar"></i></div>
+
+    <div class="card">
+      <div class="qhead"><span class="chip" id="qtopic"></span><span class="hinttoggle" id="qHintToggle"><span class="hbox"></span>Show topic</span></div>
+      <div class="ask" id="qask"></div>
+      <div class="prompt" id="qprompt"></div>
+      <div id="qhintText" class="hidden"></div>
+
+      <input class="answer-in" id="qinput" autocomplete="off" autocapitalize="off"
+        autocorrect="off" spellcheck="false" placeholder="type your answer">
+
+      <div id="qfeedback"></div>
+
+      <div class="row spread" style="margin-top:16px">
+        <div class="row">
+          <button class="btn ghost sm" id="qquit">Quit</button>
+          <button class="btn ghost sm" id="qback" title="Back to the previous question">← Back</button>
+          <button class="btn ghost sm" id="qfwd" title="Step forward — on an unanswered question this skips it (it stays in the round)">Forward →</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost sm hidden" id="qhint">💡 Hint</button>
+          <button class="btn ghost sm" id="qshow">Show answer</button>
+          <button class="btn" id="qsubmit">Check (Enter)</button>
+          <button class="btn hidden" id="qnext">Next (Enter) →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div id="results" class="hidden">
+    <div class="card">
+      <div class="row spread" style="align-items:flex-end">
+        <div>
+          <div class="score-big" id="rScore"></div>
+          <div class="score-sub" id="rSub"></div>
+        </div>
+        <div id="rEmoji" style="font-size:46px"></div>
+      </div>
+      <div class="bar"><i id="rBar"></i></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--good)"></span>Correct</span>
+        <span><span class="dot" style="background:var(--half)"></span>Half credit</span>
+        <span><span class="dot" style="background:var(--bad)"></span>Missed</span>
+      </div>
+      <div class="row" style="margin-top:18px;gap:10px">
+        <button class="btn" id="rSend">Send results to Claude</button>
+        <button class="btn ghost" id="rAgain">Try these again</button>
+        <button class="btn ghost" id="rWrong">Retry missed only</button>
+        <button class="btn ghost" id="rMenu">Back to menu</button>
+      </div>
+    </div>
+
+    <div class="section-title">Review</div>
+    <div class="card tscroll">
+      <table>
+        <thead><tr><th>#</th><th>Shown</th><th>Your answer</th><th>Answer</th><th>Pts</th></tr></thead>
+        <tbody id="rTable"></tbody>
+      </table>
+    </div>
+    <footer>がんばって、Shep! Keep going — repetition is how it sticks.</footer>
+  </div>
+
+  <!-- ============ KANJI QUIZ ============ -->
+  <div id="kquiz" class="hidden">
+    <div class="qtop">
+      <span id="kqcount"></span>
+      <span>Score: <b id="kqscore">0</b></span>
+    </div>
+    <div class="progress"><i id="kqbar"></i></div>
+
+    <div class="card">
+      <div class="qhead"><span class="chip" id="kqtopic">漢字 recognition</span><span class="hinttoggle" id="kqHintToggle"><span class="hbox"></span>Show topic</span></div>
+      <div class="ask">Read the kanji — type the romaji reading, then the English meaning.</div>
+      <div class="prompt kana jp" id="kqprompt"></div>
+      <div id="kqhintText" class="hidden"></div>
+
+      <div class="kqfields">
+        <label class="kqf"><span class="kqlbl">Reading · romaji</span>
+          <input class="answer-in" id="kqRead" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type the reading"></label>
+        <label class="kqf"><span class="kqlbl">Meaning · English</span>
+          <input class="answer-in" id="kqMean" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type the meaning"></label>
+      </div>
+
+      <div id="kqfeedback"></div>
+
+      <div class="row spread" style="margin-top:16px">
+        <div class="row">
+          <button class="btn ghost sm" id="kqquit">Quit</button>
+          <button class="btn ghost sm" id="kqback" title="Previous kanji">← Back</button>
+          <button class="btn ghost sm" id="kqfwd" title="Skip forward">Forward →</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost sm hidden" id="kqhint">💡 Hint</button>
+          <button class="btn ghost sm" id="kqshow">Show answer</button>
+          <button class="btn" id="kqsubmit">Check (Enter)</button>
+          <button class="btn hidden" id="kqnext">Next (Enter) →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ KANJI RESULTS ============ -->
+  <div id="kresults" class="hidden">
+    <div class="card">
+      <div class="row spread" style="align-items:flex-end">
+        <div>
+          <div class="score-big" id="krScore"></div>
+          <div class="score-sub" id="krSub"></div>
+        </div>
+        <div id="krEmoji" style="font-size:46px"></div>
+      </div>
+      <div class="bar"><i id="krBar"></i></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--good)"></span>Both right</span>
+        <span><span class="dot" style="background:var(--half)"></span>Partial</span>
+        <span><span class="dot" style="background:var(--bad)"></span>Missed</span>
+      </div>
+      <div class="row" style="margin-top:18px;gap:10px">
+        <button class="btn" id="krSend">Send results to Claude</button>
+        <button class="btn ghost" id="krAgain">Try these again</button>
+        <button class="btn ghost" id="krWrong">Retry missed only</button>
+        <button class="btn ghost" id="krMenu">Back to menu</button>
+      </div>
+    </div>
+
+    <div class="section-title">Review</div>
+    <div class="card tscroll">
+      <table>
+        <thead><tr><th>#</th><th>Kanji</th><th>Your answer</th><th>Reading · meaning</th><th>Pts</th></tr></thead>
+        <tbody id="krTable"></tbody>
+      </table>
+    </div>
+    <footer>漢字 がんばって! Recognition first — the readings stick with repetition.</footer>
+  </div>
+
+  <!-- ============ CONJUGATION QUIZ ============ -->
+  <div id="cquiz" class="hidden">
+    <div class="qtop"><span id="cqcount"></span><span>Score: <b id="cqscore">0</b></span></div>
+    <div class="progress"><i id="cqbar"></i></div>
+    <div class="card">
+      <div class="ask">Translate into Japanese romaji:</div>
+      <div class="csent" id="csent"></div>
+      <div class="clabelwrap"><span class="creg" id="creg"></span></div>
+      <input class="answer-in" id="cinput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type the conjugated romaji">
+      <div id="cqfeedback"></div>
+      <div class="row spread" style="margin-top:16px">
+        <div class="row">
+          <button class="btn ghost sm" id="cqquit">Quit</button>
+          <button class="btn ghost sm" id="cqback" title="Previous">← Back</button>
+          <button class="btn ghost sm" id="cqfwd" title="Skip forward">Forward →</button>
+        </div>
+        <div class="row">
+          <button class="btn ghost sm" id="cqshow">Show answer</button>
+          <button class="btn" id="cqsubmit">Check (Enter)</button>
+          <button class="btn hidden" id="cqnext">Next (Enter) →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CONJUGATION RESULTS ============ -->
+  <div id="cresults" class="hidden">
+    <div class="card">
+      <div class="row spread" style="align-items:flex-end">
+        <div><div class="score-big" id="crScore"></div><div class="score-sub" id="crSub"></div></div>
+        <div id="crEmoji" style="font-size:46px"></div>
+      </div>
+      <div class="bar"><i id="crBar"></i></div>
+      <div class="legend"><span><span class="dot" style="background:var(--good)"></span>Correct</span><span><span class="dot" style="background:var(--half)"></span>Half</span><span><span class="dot" style="background:var(--bad)"></span>Missed</span></div>
+      <div class="row" style="margin-top:18px;gap:10px">
+        <button class="btn" id="crSend">Send results to Claude</button>
+        <button class="btn ghost" id="crAgain">Try these again</button>
+        <button class="btn ghost" id="crWrong">Retry missed only</button>
+        <button class="btn ghost" id="crMenu">Back to menu</button>
+      </div>
+    </div>
+    <div class="section-title">Review</div>
+    <div class="card tscroll"><table><thead><tr><th>#</th><th>Verb</th><th>Target</th><th>Your answer</th><th>Answer</th><th>Pts</th></tr></thead><tbody id="crTable"></tbody></table></div>
+    <footer>活用 がんばって! Tenses click once you drill them a few times.</footer>
+  </div>
+
+
+
+</div>
+
+<script>
+const DATA = [{"t": "flow", "k": "あさ", "r": ["asa"], "e": "morning", "a": [], "p": false, "b": 1, "kj": "朝"}, {"t": "flow", "k": "ひる", "r": ["hiru"], "e": "noon", "a": ["noon", "daytime", "afternoon", "midday"], "p": false, "b": 1, "kj": "昼"}, {"t": "flow", "k": "よる", "r": ["yoru", "ban"], "e": "night", "a": ["night", "evening"], "p": false, "b": 1, "kj": "夜"}, {"t": "greet", "k": "おはようございます", "r": ["ohayougozaimasu"], "e": "good morning", "a": ["good morning"], "p": false, "b": 1}, {"t": "greet", "k": "こんにちわ", "r": ["konnichiwa"], "e": "hello", "a": ["hello", "good afternoon", "good day", "hi"], "p": false, "b": 1}, {"t": "greet", "k": "こんばんわ", "r": ["konbanwa"], "e": "good evening", "a": ["good evening"], "p": false, "b": 1}, {"t": "reltime", "k": "きのう", "r": ["kinou"], "e": "yesterday", "a": [], "p": false, "b": 1, "kj": "昨日"}, {"t": "reltime", "k": "きょう", "r": ["kyou"], "e": "today", "a": [], "p": false, "b": 1, "kj": "今日"}, {"t": "reltime", "k": "いま", "r": ["ima"], "e": "now", "a": ["now", "right now"], "p": false, "b": 1, "kj": "今"}, {"t": "reltime", "k": "あした", "r": ["ashita"], "e": "tomorrow", "a": [], "p": false, "b": 1, "kj": "明日"}, {"t": "subj", "k": "わたし", "r": ["watashi"], "e": "I", "a": ["i", "me"], "p": false, "b": 1, "kj": "私"}, {"t": "subj", "k": "あなた", "r": ["anata"], "e": "you", "a": [], "p": false, "b": 1}, {"t": "subj", "k": "かれ", "r": ["kare"], "e": "he", "a": ["he", "him"], "p": false, "b": 1, "kj": "彼"}, {"t": "subj", "k": "かのじょ", "r": ["kanojo"], "e": "she / her", "a": ["she", "her", "she her"], "p": false, "b": 1, "kj": "彼女"}, {"t": "subj", "k": "わたしたち", "r": ["watashitachi"], "e": "we", "a": ["we", "us"], "p": false, "b": 1, "kj": "私たち"}, {"t": "subj", "k": "あなたたち", "r": ["anatatachi"], "e": "you (plural)", "a": ["you all", "you plural", "you guys", "you"], "p": false, "b": 1}, {"t": "subj", "k": "かれら", "r": ["karera", "karetachi"], "e": "they (men)", "a": ["they", "them", "they men"], "p": false, "b": 1, "kj": "彼ら"}, {"t": "subj", "k": "かのじょら", "r": ["kanojora", "kanojotachi"], "e": "they (women)", "a": ["they", "them", "they women"], "p": false, "b": 1, "kj": "彼女ら"}, {"t": "poss", "k": "わたしの", "r": ["watashino"], "e": "my", "a": ["my", "mine"], "p": false, "b": 1, "kj": "私の"}, {"t": "poss", "k": "あなたの", "r": ["anatano"], "e": "your", "a": ["your", "yours"], "p": false, "b": 1}, {"t": "poss", "k": "かれの", "r": ["kareno"], "e": "his", "a": [], "p": false, "b": 1, "kj": "彼の"}, {"t": "poss", "k": "かのじょの", "r": ["kanojono"], "e": "her / hers (her book)", "a": ["her", "hers"], "p": false, "b": 1, "kj": "彼女の"}, {"t": "poss", "k": "わたしたちの", "r": ["watashitachino"], "e": "our", "a": ["our", "ours"], "p": false, "b": 1, "kj": "私たちの"}, {"t": "poss", "k": "あなたたちの", "r": ["anatatachino"], "e": "your (plural)", "a": ["your", "yours", "your plural"], "p": false, "b": 1}, {"t": "poss", "k": "かれらの", "r": ["karerano", "karetachino"], "e": "their (men)", "a": ["their", "theirs", "their men"], "p": false, "b": 1, "kj": "彼らの"}, {"t": "poss", "k": "かのじょらの", "r": ["kanojorano", "kanojotachino"], "e": "their (women)", "a": ["their", "theirs", "their women"], "p": false, "b": 1, "kj": "彼女らの"}, {"t": "demo", "k": "これ", "r": ["kore"], "e": "this", "a": ["this", "this one"], "p": false, "b": 1}, {"t": "demo", "k": "それ", "r": ["sore"], "e": "that / it", "a": ["that", "it", "that one"], "p": false, "b": 1}, {"t": "demo", "k": "あれ", "r": ["are"], "e": "that (over there)", "a": ["that", "that over there", "that one"], "p": false, "b": 1}, {"t": "demo", "k": "この", "r": ["kono"], "e": "this (+noun)", "a": ["this"], "p": false, "b": 1}, {"t": "demo", "k": "その", "r": ["sono"], "e": "that (+noun)", "a": ["that"], "p": false, "b": 1}, {"t": "demo", "k": "あの", "r": ["ano"], "e": "that (+noun, over there)", "a": ["that", "that over there"], "p": false, "b": 1}, {"t": "fam", "k": "おじいさん", "r": ["ojiisan"], "e": "grandfather", "a": ["grandfather", "grandpa", "granddad", "grandad"], "p": false, "b": 1, "kj": "お祖父さん"}, {"t": "fam", "k": "おばあさん", "r": ["obaasan"], "e": "grandmother", "a": ["grandmother", "grandma", "granny", "grandmom"], "p": false, "b": 1, "kj": "お祖母さん"}, {"t": "fam", "k": "おとうさん", "r": ["otousan"], "e": "father", "a": ["father", "dad", "daddy"], "p": false, "b": 1, "kj": "お父さん"}, {"t": "fam", "k": "おかあさん", "r": ["okaasan"], "e": "mother", "a": ["mother", "mom", "mum", "mommy", "mummy"], "p": false, "b": 1, "kj": "お母さん"}, {"t": "fam", "k": "おにいさん", "r": ["oniisan"], "e": "older brother", "a": ["older brother", "big brother", "elder brother"], "p": false, "b": 1, "kj": "お兄さん"}, {"t": "fam", "k": "おねえさん", "r": ["oneesan"], "e": "older sister", "a": ["older sister", "big sister", "elder sister"], "p": false, "b": 1, "kj": "お姉さん"}, {"t": "fam", "k": "おとうと", "r": ["otouto"], "e": "younger brother", "a": ["younger brother", "little brother"], "p": false, "b": 1, "kj": "弟"}, {"t": "fam", "k": "いもうと", "r": ["imouto"], "e": "younger sister", "a": ["younger sister", "little sister"], "p": false, "b": 1, "kj": "妹"}, {"t": "days", "k": "げつようび", "r": ["getsuyoubi"], "e": "Monday", "a": [], "p": false, "b": 1, "kj": "月曜日"}, {"t": "days", "k": "かようび", "r": ["kayoubi"], "e": "Tuesday", "a": [], "p": false, "b": 1, "kj": "火曜日"}, {"t": "days", "k": "すいようび", "r": ["suiyoubi"], "e": "Wednesday", "a": [], "p": false, "b": 1, "kj": "水曜日"}, {"t": "days", "k": "もくようび", "r": ["mokuyoubi"], "e": "Thursday", "a": [], "p": false, "b": 1, "kj": "木曜日"}, {"t": "days", "k": "きんようび", "r": ["kinyoubi"], "e": "Friday", "a": [], "p": false, "b": 1, "kj": "金曜日"}, {"t": "days", "k": "どようび", "r": ["doyoubi"], "e": "Saturday", "a": [], "p": false, "b": 1, "kj": "土曜日"}, {"t": "days", "k": "にちようび", "r": ["nichiyoubi"], "e": "Sunday", "a": [], "p": false, "b": 1, "kj": "日曜日"}, {"t": "num", "k": "いち", "r": ["ichi"], "e": "1", "a": ["1", "one"], "p": false, "b": 1, "kj": "一"}, {"t": "num", "k": "に", "r": ["ni"], "e": "2", "a": ["2", "two"], "p": false, "b": 1, "kj": "二"}, {"t": "num", "k": "さん", "r": ["san"], "e": "3", "a": ["3", "three"], "p": false, "b": 1, "kj": "三"}, {"t": "num", "k": "よん", "r": ["yon", "yo", "shi"], "e": "4", "a": ["4", "four"], "p": false, "b": 1, "kj": "四"}, {"t": "num", "k": "ご", "r": ["go"], "e": "5", "a": ["5", "five"], "p": false, "b": 1, "kj": "五"}, {"t": "num", "k": "ろく", "r": ["roku"], "e": "6", "a": ["6", "six"], "p": false, "b": 1, "kj": "六"}, {"t": "num", "k": "なな", "r": ["nana", "shichi"], "e": "7", "a": ["7", "seven"], "p": false, "b": 1, "kj": "七"}, {"t": "num", "k": "はち", "r": ["hachi"], "e": "8", "a": ["8", "eight"], "p": false, "b": 1, "kj": "八"}, {"t": "num", "k": "きゅう", "r": ["kyuu", "ku"], "e": "9", "a": ["9", "nine"], "p": false, "b": 1, "kj": "九"}, {"t": "num", "k": "じゅう", "r": ["juu"], "e": "10", "a": ["10", "ten"], "p": false, "b": 1, "kj": "十"}, {"t": "num", "k": "じゅういち", "r": ["juuichi"], "e": "11", "a": ["11", "eleven"], "p": false, "b": 1, "kj": "十一"}, {"t": "num", "k": "じゅうに", "r": ["juuni"], "e": "12", "a": ["12", "twelve"], "p": false, "b": 1, "kj": "十二"}, {"t": "oclock", "k": "いちじ", "r": ["ichiji"], "e": "1 o'clock", "a": ["1 o'clock", "1:00", "1", "one o'clock"], "p": false, "b": 1, "kj": "一時"}, {"t": "oclock", "k": "にじ", "r": ["niji"], "e": "2 o'clock", "a": ["2 o'clock", "2:00", "2", "two o'clock"], "p": false, "b": 1, "kj": "二時"}, {"t": "oclock", "k": "さんじ", "r": ["sanji"], "e": "3 o'clock", "a": ["3 o'clock", "3:00", "3", "three o'clock"], "p": false, "b": 1, "kj": "三時"}, {"t": "oclock", "k": "よじ", "r": ["yoji"], "e": "4 o'clock", "a": ["4 o'clock", "4:00", "4", "four o'clock"], "p": false, "b": 1, "kj": "四時"}, {"t": "oclock", "k": "ごじ", "r": ["goji"], "e": "5 o'clock", "a": ["5 o'clock", "5:00", "5", "five o'clock"], "p": false, "b": 1, "kj": "五時"}, {"t": "oclock", "k": "ろくじ", "r": ["rokuji"], "e": "6 o'clock", "a": ["6 o'clock", "6:00", "6", "six o'clock"], "p": false, "b": 1, "kj": "六時"}, {"t": "oclock", "k": "しちじ", "r": ["shichiji"], "e": "7 o'clock", "a": ["7 o'clock", "7:00", "7", "seven o'clock"], "p": false, "b": 1, "kj": "七時"}, {"t": "oclock", "k": "はちじ", "r": ["hachiji"], "e": "8 o'clock", "a": ["8 o'clock", "8:00", "8", "eight o'clock"], "p": false, "b": 1, "kj": "八時"}, {"t": "oclock", "k": "くじ", "r": ["kuji"], "e": "9 o'clock", "a": ["9 o'clock", "9:00", "9", "nine o'clock"], "p": false, "b": 1, "kj": "九時"}, {"t": "oclock", "k": "じゅうじ", "r": ["juuji"], "e": "10 o'clock", "a": ["10 o'clock", "10:00", "10", "ten o'clock"], "p": false, "b": 1, "kj": "十時"}, {"t": "oclock", "k": "じゅういちじ", "r": ["juuichiji"], "e": "11 o'clock", "a": ["11 o'clock", "11:00", "11", "eleven o'clock"], "p": false, "b": 1, "kj": "十一時"}, {"t": "oclock", "k": "じゅうにじ", "r": ["juuniji"], "e": "12 o'clock", "a": ["12 o'clock", "12:00", "12", "twelve o'clock"], "p": false, "b": 1, "kj": "十二時"}, {"t": "oclock", "k": "ごぜん", "r": ["gozen"], "e": "AM", "a": ["am", "a.m.", "morning"], "p": false, "b": 1, "kj": "午前"}, {"t": "oclock", "k": "ごご", "r": ["gogo"], "e": "PM", "a": ["pm", "p.m.", "afternoon"], "p": false, "b": 1, "kj": "午後"}, {"t": "min", "k": "いっぷん", "r": ["ippun"], "e": "1 minute", "a": ["1 minutes", "1 minute", "1 min", "1"], "p": false, "b": 1, "kj": "一分"}, {"t": "min", "k": "にふん", "r": ["nifun"], "e": "2 minutes", "a": ["2 minutes", "2 minute", "2 min", "2"], "p": false, "b": 1, "kj": "二分"}, {"t": "min", "k": "さんぷん", "r": ["sanpun"], "e": "3 minutes", "a": ["3 minutes", "3 minute", "3 min", "3"], "p": false, "b": 1, "kj": "三分"}, {"t": "min", "k": "ごふん", "r": ["gofun"], "e": "5 minutes", "a": ["5 minutes", "5 minute", "5 min", "5"], "p": false, "b": 1, "kj": "五分"}, {"t": "min", "k": "じっぷん", "r": ["jippun", "juppun"], "e": "10 minutes", "a": ["10 minutes", "10 minute", "10 min", "10"], "p": false, "b": 1, "kj": "十分"}, {"t": "month", "k": "いちがつ", "r": ["ichigatsu"], "e": "January", "a": ["January", "jan"], "p": false, "b": 1, "kj": "一月"}, {"t": "month", "k": "にがつ", "r": ["nigatsu"], "e": "February", "a": ["February", "feb"], "p": false, "b": 1, "kj": "二月"}, {"t": "month", "k": "さんがつ", "r": ["sangatsu"], "e": "March", "a": ["March", "mar"], "p": false, "b": 1, "kj": "三月"}, {"t": "month", "k": "しがつ", "r": ["shigatsu"], "e": "April", "a": ["April", "apr"], "p": false, "b": 1, "kj": "四月"}, {"t": "month", "k": "ごがつ", "r": ["gogatsu"], "e": "May", "a": ["May", "may"], "p": false, "b": 1, "kj": "五月"}, {"t": "month", "k": "ろくがつ", "r": ["rokugatsu"], "e": "June", "a": ["June", "jun"], "p": false, "b": 1, "kj": "六月"}, {"t": "month", "k": "しちがつ", "r": ["shichigatsu"], "e": "July", "a": ["July", "jul"], "p": false, "b": 1, "kj": "七月"}, {"t": "month", "k": "はちがつ", "r": ["hachigatsu"], "e": "August", "a": ["August", "aug"], "p": false, "b": 1, "kj": "八月"}, {"t": "month", "k": "くがつ", "r": ["kugatsu"], "e": "September", "a": ["September", "sep"], "p": false, "b": 1, "kj": "九月"}, {"t": "month", "k": "じゅうがつ", "r": ["juugatsu"], "e": "October", "a": ["October", "oct"], "p": false, "b": 1, "kj": "十月"}, {"t": "month", "k": "じゅういちがつ", "r": ["juuichigatsu"], "e": "November", "a": ["November", "nov"], "p": false, "b": 1, "kj": "十一月"}, {"t": "month", "k": "じゅうにがつ", "r": ["juunigatsu"], "e": "December", "a": ["December", "dec"], "p": false, "b": 1, "kj": "十二月"}, {"t": "weather", "k": "はれ", "r": ["hare"], "e": "sunny", "a": ["sunny", "clear", "fine", "sun", "sunshine", "sunny weather"], "p": false, "b": 1, "kj": "晴れ"}, {"t": "weather", "k": "くもり", "r": ["kumori"], "e": "cloudy", "a": ["cloudy", "cloud", "clouds", "overcast"], "p": false, "b": 1, "kj": "曇り"}, {"t": "weather", "k": "あめ", "r": ["ame"], "e": "rain", "a": ["rain", "rainy", "raining"], "p": false, "b": 1, "kj": "雨"}, {"t": "weather", "k": "ゆき", "r": ["yuki"], "e": "snow", "a": ["snow", "snowy", "snowing"], "p": false, "b": 1, "kj": "雪"}, {"t": "weather", "k": "かぜがつよい", "r": ["kazegatsuyoi"], "e": "windy", "a": ["windy", "strong wind", "the wind is strong", "wind is strong"], "p": false, "b": 1, "kj": "風が強い"}, {"t": "season", "k": "はる", "r": ["haru"], "e": "spring", "a": [], "p": false, "b": 1, "kj": "春"}, {"t": "season", "k": "つゆ", "r": ["tsuyu"], "e": "rainy season", "a": ["rainy season", "the rainy season"], "p": false, "b": 1, "kj": "梅雨"}, {"t": "season", "k": "なつ", "r": ["natsu"], "e": "summer", "a": [], "p": false, "b": 1, "kj": "夏"}, {"t": "season", "k": "あき", "r": ["aki"], "e": "fall", "a": ["fall", "autumn"], "p": false, "b": 1, "kj": "秋"}, {"t": "season", "k": "ふゆ", "r": ["fuyu"], "e": "winter", "a": [], "p": false, "b": 1, "kj": "冬"}, {"t": "dir", "k": "うえ", "r": ["ue"], "e": "up", "a": ["up", "above", "top", "over", "upper"], "p": false, "b": 1, "kj": "上"}, {"t": "dir", "k": "した", "r": ["shita"], "e": "down", "a": ["down", "below", "under", "bottom", "beneath", "lower"], "p": false, "b": 1, "kj": "下"}, {"t": "dir", "k": "ひだり", "r": ["hidari"], "e": "left", "a": [], "p": false, "b": 1, "kj": "左"}, {"t": "dir", "k": "みぎ", "r": ["migi"], "e": "right", "a": [], "p": false, "b": 1, "kj": "右"}, {"t": "dir", "k": "きた", "r": ["kita"], "e": "north", "a": [], "p": false, "b": 1, "kj": "北"}, {"t": "dir", "k": "みなみ", "r": ["minami"], "e": "south", "a": [], "p": false, "b": 1, "kj": "南"}, {"t": "dir", "k": "にし", "r": ["nishi"], "e": "west", "a": [], "p": false, "b": 1, "kj": "西"}, {"t": "dir", "k": "ひがし", "r": ["higashi"], "e": "east", "a": [], "p": false, "b": 1, "kj": "東"}, {"t": "common", "k": "いいえ", "r": ["iie"], "e": "no", "a": [], "p": false, "b": 1}, {"t": "common", "k": "おなじ", "r": ["onaji"], "e": "same", "a": ["same", "the same"], "p": false, "b": 1, "kj": "同じ"}, {"t": "common", "k": "かわいい", "r": ["kawaii"], "e": "cute", "a": ["cute", "pretty", "adorable", "lovely"], "p": false, "b": 1, "kj": "可愛い"}, {"t": "common", "k": "かわいくない", "r": ["kawaikunai"], "e": "not cute", "a": ["not cute", "uncute", "isnt cute", "is not cute"], "p": false, "b": 1, "kj": "可愛くない"}, {"t": "common", "k": "こわい", "r": ["kowai"], "e": "scary", "a": ["scary", "afraid", "scared", "frightening", "frightened", "fearful"], "p": false, "b": 1, "kj": "怖い"}, {"t": "common", "k": "こわくない", "r": ["kowakunai"], "e": "not scary", "a": ["not scary", "not afraid", "isnt scary", "is not scary"], "p": false, "b": 1, "kj": "怖くない"}, {"t": "common", "k": "だいじょうぶ", "r": ["daijoubu"], "e": "OK", "a": ["ok", "okay", "alright", "all right", "no problem", "fine", "its ok", "im ok"], "p": false, "b": 1, "kj": "大丈夫"}, {"t": "common", "k": "でも", "r": ["demo"], "e": "but", "a": ["but", "however"], "p": false, "b": 1}, {"t": "common", "k": "どうして", "r": ["doushite"], "e": "why / how come", "a": ["why", "how", "how come", "how so"], "p": false, "b": 1}, {"t": "common", "k": "とても", "r": ["totemo"], "e": "very", "a": ["very", "really", "so"], "p": false, "b": 1}, {"t": "common", "k": "なまえ", "r": ["namae"], "e": "name", "a": [], "p": false, "b": 1, "kj": "名前"}, {"t": "common", "k": "なぜ", "r": ["naze"], "e": "why (reason)", "a": ["reason", "why"], "p": false, "b": 1}, {"t": "common", "k": "なぜなら", "r": ["nazenara"], "e": "because", "a": ["because", "the reason is", "because of that"], "p": false, "b": 1}, {"t": "common", "k": "はい", "r": ["hai"], "e": "yes", "a": [], "p": false, "b": 1}, {"t": "phrase", "k": "あなたは げんき ですか？", "r": ["anata wa genki desu ka"], "e": "Are you well?", "a": ["are you well", "are you ok", "are you okay", "how are you", "are you healthy", "are you good", "are you fine"], "p": true, "b": 1}, {"t": "phrase", "k": "はい、わたしは げんき です。", "r": ["hai watashi wa genki desu"], "e": "Yes, I am well.", "a": ["yes i am well", "yes im well", "yes i am fine", "yes i am good", "yes i am healthy"], "p": true, "b": 1}, {"t": "phrase", "k": "いいえ、わたしは げんき ではない です。", "r": ["iie watashi wa genki dewa nai desu"], "e": "No, I am not well.", "a": ["no i am not well", "no im not well", "no i am not fine", "no i am not good"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうは なんようび ですか？", "r": ["kyou wa nan youbi desu ka"], "e": "What day of the week is it today?", "a": ["what day of the week is it today", "what day is it today", "what day of the week is today", "what day is today"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうは げつようび です。", "r": ["kyou wa getsuyoubi desu"], "e": "Today is Monday.", "a": ["today is monday", "it is monday today", "its monday today"], "p": true, "b": 1}, {"t": "phrase", "k": "いま なんじ ですか？", "r": ["ima nanji desu ka"], "e": "What time is it now?", "a": ["what time is it now", "what time is it", "whats the time now", "what is the time"], "p": true, "b": 1}, {"t": "phrase", "k": "いま ごぜん１０じ です。", "r": ["ima gozen juuji desu"], "e": "It is 10:00 AM now.", "a": ["it is 10am now", "it is 10 am now", "it is 10 oclock am now", "its 10am now", "it is ten am now", "it is 10:00 am now"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうの てんきは どうですか？", "r": ["kyou no tenki wa dou desu ka"], "e": "How is the weather today?", "a": ["how is the weather today", "hows the weather today", "what is the weather like today", "how is todays weather"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうの てんきは くもり です。", "r": ["kyou no tenki wa kumori desu"], "e": "Today's weather is cloudy.", "a": ["todays weather is cloudy", "the weather today is cloudy", "today it is cloudy", "its cloudy today"], "p": true, "b": 1}, {"t": "phrase", "k": "あなたの １にちは どうですか？", "r": ["anata no ichinichi wa dou desu ka"], "e": "How is your day?", "a": ["how is your day", "hows your day", "how was your day", "how is your day going"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうは とても よい １にち です。", "r": ["kyou wa totemo yoi ichinichi desu"], "e": "Today is a very good day.", "a": ["today is a very good day", "it is a very good day today", "its a very good day"], "p": true, "b": 1}, {"t": "phrase", "k": "きょうは とても わるい １にち です。", "r": ["kyou wa totemo warui ichinichi desu"], "e": "Today is a very bad day.", "a": ["today is a very bad day", "it is a very bad day today", "its a very bad day"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは ジョエル です。", "r": ["watashi wa joeru desu"], "e": "I am Joel.", "a": ["i am joel", "im joel"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしの なまえは ジョエル です。", "r": ["watashi no namae wa joeru desu"], "e": "My name is Joel.", "a": ["my name is joel"], "p": true, "b": 1}, {"t": "phrase", "k": "あなたは えいじ です。", "r": ["anata wa eiji desu"], "e": "You are Eiji.", "a": ["you are eiji", "youre eiji"], "p": true, "b": 1}, {"t": "phrase", "k": "あなたの なまえは えいじ です。", "r": ["anata no namae wa eiji desu"], "e": "Your name is Eiji.", "a": ["your name is eiji"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしの おとうとの なまえは ロックリン です。", "r": ["watashi no otouto no namae wa rokkurin desu"], "e": "My younger brother's name is Rocklin.", "a": ["my younger brothers name is rocklin", "my little brothers name is rocklin", "my younger brother is called rocklin"], "p": true, "b": 1}, {"t": "phrase", "k": "かれは ロジャー です。", "r": ["kare wa rojaa desu"], "e": "He is Roger.", "a": ["he is roger", "hes roger"], "p": true, "b": 1}, {"t": "phrase", "k": "かれは １４さい です。", "r": ["kare wa juuyon sai desu"], "e": "He is 14 years old.", "a": ["he is 14 years old", "hes 14 years old", "he is 14", "he is fourteen years old", "he is fourteen"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは きんようび が すきです。", "r": ["watashi wa kinyoubi ga suki desu"], "e": "I like Friday.", "a": ["i like friday", "i like fridays"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは ラーメン が すきです。", "r": ["watashi wa raamen ga suki desu"], "e": "I like ramen.", "a": ["i like ramen"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは いぬ が すきです。", "r": ["watashi wa inu ga suki desu"], "e": "I like dogs.", "a": ["i like dogs", "i like dog"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは にほんの ふゆ が すきです。", "r": ["watashi wa nihon no fuyu ga suki desu"], "e": "I like Japanese winter.", "a": ["i like japanese winter", "i like japans winter", "i like winter in japan", "i like the japanese winter"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは サラダ が すきではない です。", "r": ["watashi wa sarada ga suki dewa nai desu"], "e": "I don't like salad.", "a": ["i dont like salad", "i do not like salad"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは スパイダー が すきではない です。", "r": ["watashi wa supaidaa ga suki dewa nai desu"], "e": "I don't like spiders.", "a": ["i dont like spiders", "i do not like spiders", "i dont like spider", "i dislike spiders"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは ワイン が すきではない。", "r": ["watashi wa wain ga suki dewa nai"], "e": "I don't like wine.", "a": ["i dont like wine", "i do not like wine", "i dislike wine"], "p": true, "b": 1}, {"t": "phrase", "k": "わたしは かぜがつよい てんき が すきではない です。なぜなら わたしは パイロットです。", "r": ["watashi wa kazegatsuyoi tenki ga suki dewa nai desu. nazenara watashi wa pairotto desu"], "e": "I don't like windy weather, because I am a pilot.", "a": ["i dont like windy weather because i am a pilot", "i do not like windy weather because i am a pilot", "i dont like windy weather because im a pilot"], "p": true, "b": 1}, {"t": "phrase", "k": "にほんは いま なんじ ですか？", "r": ["nihon wa ima nanji desu ka"], "e": "What time is it now in Japan?", "a": ["what time is it now in japan", "what time is it in japan now", "what time is it in japan"], "p": true, "b": 1}, {"t": "phrase", "k": "きのう わたしは フライトで そらのうえに いきました。", "r": ["kinou watashi wa furaito de sora no ue ni ikimashita"], "e": "Yesterday I went up in the sky on a flight.", "a": ["yesterday i went up in the sky on a flight", "yesterday i went up into the sky on a flight", "yesterday i went up in the sky", "i went up in the sky yesterday on a flight"], "p": true, "b": 1}, {"t": "chores", "k": "そうじする", "r": ["soujisuru"], "e": "clean (casual)", "a": ["clean", "to clean", "cleaning", "do cleaning", "tidy up"], "p": false, "b": 2, "kj": "掃除する"}, {"t": "chores", "k": "そうじします", "r": ["soujishimasu"], "e": "clean (polite)", "a": ["clean", "to clean", "cleaning", "do cleaning", "tidy up"], "p": false, "b": 2, "kj": "掃除します"}, {"t": "chores", "k": "そうじしない", "r": ["soujishinai"], "e": "don't clean (casual)", "a": ["dont clean", "do not clean", "not clean"], "p": false, "b": 2, "kj": "掃除しない"}, {"t": "chores", "k": "そうじしません", "r": ["soujishimasen"], "e": "don't clean (polite)", "a": ["dont clean", "do not clean", "not clean"], "p": false, "b": 2, "kj": "掃除しません"}, {"t": "chores", "k": "せんたくする", "r": ["sentakusuru"], "e": "do the laundry (casual)", "a": ["do the laundry", "do laundry", "to do laundry", "wash clothes", "laundry"], "p": false, "b": 2, "kj": "洗濯する"}, {"t": "chores", "k": "せんたくします", "r": ["sentakushimasu"], "e": "do the laundry (polite)", "a": ["do the laundry", "do laundry", "to do laundry", "wash clothes", "laundry"], "p": false, "b": 2, "kj": "洗濯します"}, {"t": "chores", "k": "せんたくしない", "r": ["sentakushinai"], "e": "don't do the laundry (casual)", "a": ["dont do the laundry", "do not do laundry", "dont do laundry", "not do laundry"], "p": false, "b": 2, "kj": "洗濯しない"}, {"t": "chores", "k": "せんたくしません", "r": ["sentakushimasen"], "e": "don't do the laundry (polite)", "a": ["dont do the laundry", "do not do laundry", "dont do laundry", "not do laundry"], "p": false, "b": 2, "kj": "洗濯しません"}, {"t": "adj", "k": "おもたい", "r": ["omotai"], "e": "heavy", "a": ["heavy"], "p": false, "b": 2, "kj": "重い"}, {"t": "adj", "k": "おもたくない", "r": ["omotakunai"], "e": "not heavy", "a": ["not heavy", "isnt heavy", "is not heavy"], "p": false, "b": 2, "kj": "重くない"}, {"t": "adj", "k": "かるい", "r": ["karui"], "e": "light (not heavy)", "a": ["light", "lightweight", "light weight"], "p": false, "b": 2, "kj": "軽い"}, {"t": "adj", "k": "かるくない", "r": ["karukunai"], "e": "not light", "a": ["not light", "isnt light", "is not light"], "p": false, "b": 2, "kj": "軽くない"}, {"t": "adj", "k": "たかい", "r": ["takai"], "e": "tall / high", "a": ["tall", "high", "expensive"], "p": false, "b": 2, "kj": "高い"}, {"t": "adj", "k": "たかくない", "r": ["takakunai"], "e": "not tall / not high", "a": ["not tall", "not high", "isnt tall", "not expensive"], "p": false, "b": 2, "kj": "高くない"}, {"t": "adj", "k": "ひくい", "r": ["hikui"], "e": "low / short (height)", "a": ["low", "short"], "p": false, "b": 2, "kj": "低い"}, {"t": "adj", "k": "ひくくない", "r": ["hikukunai"], "e": "not low / not short (height)", "a": ["not low", "not short", "isnt low", "not short height"], "p": false, "b": 2, "kj": "低くない"}, {"t": "adj", "k": "ながい", "r": ["nagai"], "e": "long", "a": ["long"], "p": false, "b": 2, "kj": "長い"}, {"t": "adj", "k": "ながくない", "r": ["nagakunai"], "e": "not long", "a": ["not long", "isnt long", "is not long"], "p": false, "b": 2, "kj": "長くない"}, {"t": "adj", "k": "みじかい", "r": ["mijikai"], "e": "short (length)", "a": ["short", "short length"], "p": false, "b": 2, "kj": "短い"}, {"t": "adj", "k": "みじかくない", "r": ["mijikakunai"], "e": "not short (length)", "a": ["not short", "isnt short", "is not short", "not short length"], "p": false, "b": 2, "kj": "短くない"}, {"t": "adj", "k": "おおきい", "r": ["ookii"], "e": "big", "a": ["big", "large"], "p": false, "b": 2, "kj": "大きい"}, {"t": "adj", "k": "おおきくない", "r": ["ookikunai"], "e": "not big", "a": ["not big", "isnt big", "is not big"], "p": false, "b": 2, "kj": "大きくない"}, {"t": "adj", "k": "ちいさい", "r": ["chiisai"], "e": "small", "a": ["small", "little"], "p": false, "b": 2, "kj": "小さい"}, {"t": "adj", "k": "ちいさくない", "r": ["chiisakunai"], "e": "not small", "a": ["not small", "isnt small", "is not small"], "p": false, "b": 2, "kj": "小さくない"}, {"t": "adj", "k": "せがたかい", "r": ["segatakai"], "e": "tall (person)", "a": ["tall", "is tall", "tall person"], "p": false, "b": 2, "kj": "背が高い"}, {"t": "adj", "k": "せがひくい", "r": ["segahikui"], "e": "short (person)", "a": ["short", "is short", "short person"], "p": false, "b": 2, "kj": "背が低い"}, {"t": "body", "k": "かお", "r": ["kao"], "e": "face", "a": [], "p": false, "b": 2, "kj": "顔"}, {"t": "body", "k": "あたま", "r": ["atama"], "e": "head", "a": [], "p": false, "b": 2, "kj": "頭"}, {"t": "body", "k": "め", "r": ["me"], "e": "eye", "a": ["eye", "eyes"], "p": false, "b": 2, "kj": "目"}, {"t": "body", "k": "みみ", "r": ["mimi"], "e": "ear", "a": ["ear", "ears"], "p": false, "b": 2, "kj": "耳"}, {"t": "body", "k": "はな", "r": ["hana"], "e": "nose", "a": ["nose"], "p": false, "b": 2, "kj": "鼻"}, {"t": "body", "k": "くち", "r": ["kuchi"], "e": "mouth", "a": ["mouth"], "p": false, "b": 2, "kj": "口"}, {"t": "body", "k": "かみ", "r": ["kami"], "e": "hair", "a": ["hair"], "p": false, "b": 2, "kj": "髪"}, {"t": "body", "k": "せ", "r": ["se"], "e": "height (person)", "a": ["height", "stature", "build"], "p": false, "b": 2, "kj": "背"}, {"t": "things", "k": "はこ", "r": ["hako"], "e": "box", "a": ["box"], "p": false, "b": 2, "kj": "箱"}, {"t": "things", "k": "はし", "r": ["hashi"], "e": "bridge", "a": ["bridge"], "p": false, "b": 2, "kj": "橋"}, {"t": "things", "k": "いぬ", "r": ["inu"], "e": "dog", "a": ["dog", "dogs"], "p": false, "b": 2, "kj": "犬"}, {"t": "common", "k": "まいにち", "r": ["mainichi"], "e": "everyday", "a": ["everyday", "every day", "daily"], "p": false, "b": 2, "kj": "毎日"}, {"t": "descphrase", "k": "この はこは おもたい です", "r": ["kono hako wa omotai desu"], "e": "This box is heavy", "a": ["this box is heavy"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はこは おもたくない です", "r": ["kono hako wa omotakunai desu"], "e": "This box is not heavy", "a": ["this box is not heavy", "this box isnt heavy"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はこは かるい です", "r": ["kono hako wa karui desu"], "e": "This box is light", "a": ["this box is light"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はこは かるくない です", "r": ["kono hako wa karukunai desu"], "e": "This box is not light", "a": ["this box is not light", "this box isnt light"], "p": true, "b": 2}, {"t": "descphrase", "k": "かのじょは せがたかい です", "r": ["kanojo wa se ga takai desu"], "e": "She is tall", "a": ["she is tall", "shes tall"], "p": true, "b": 2}, {"t": "descphrase", "k": "かのじょは せがたかくない です", "r": ["kanojo wa se ga takakunai desu"], "e": "She is not tall", "a": ["she is not tall", "she isnt tall"], "p": true, "b": 2}, {"t": "descphrase", "k": "かのじょは せがひくい です", "r": ["kanojo wa se ga hikui desu"], "e": "She is short", "a": ["she is short", "shes short"], "p": true, "b": 2}, {"t": "descphrase", "k": "かのじょは せがひくくない です", "r": ["kanojo wa se ga hikukunai desu"], "e": "She is not short", "a": ["she is not short", "she isnt short"], "p": true, "b": 2}, {"t": "descphrase", "k": "かれの かみは ながい です", "r": ["kare no kami wa nagai desu"], "e": "His hair is long", "a": ["his hair is long"], "p": true, "b": 2}, {"t": "descphrase", "k": "かれの かみは ながくない です", "r": ["kare no kami wa nagakunai desu"], "e": "His hair is not long", "a": ["his hair is not long", "his hair isnt long"], "p": true, "b": 2}, {"t": "descphrase", "k": "かれの かみは みじかい です", "r": ["kare no kami wa mijikai desu"], "e": "His hair is short", "a": ["his hair is short"], "p": true, "b": 2}, {"t": "descphrase", "k": "かれの かみは みじかくない です", "r": ["kare no kami wa mijikakunai desu"], "e": "His hair is not short", "a": ["his hair is not short", "his hair isnt short"], "p": true, "b": 2}, {"t": "descphrase", "k": "この いぬは おおきい です", "r": ["kono inu wa ookii desu"], "e": "This dog is big", "a": ["this dog is big", "this dog is large"], "p": true, "b": 2}, {"t": "descphrase", "k": "この いぬは おおきくない です", "r": ["kono inu wa ookikunai desu"], "e": "This dog is not big", "a": ["this dog is not big", "this dog isnt big"], "p": true, "b": 2}, {"t": "descphrase", "k": "これは おおきい いぬ です", "r": ["kore wa ookii inu desu"], "e": "This is a big dog", "a": ["this is a big dog"], "p": true, "b": 2}, {"t": "descphrase", "k": "これは おおきい いぬ ではない です", "r": ["kore wa ookii inu dewa nai desu"], "e": "This is not a big dog", "a": ["this is not a big dog", "this isnt a big dog"], "p": true, "b": 2}, {"t": "descphrase", "k": "この いぬは ちいさい です", "r": ["kono inu wa chiisai desu"], "e": "This dog is small", "a": ["this dog is small", "this dog is little"], "p": true, "b": 2}, {"t": "descphrase", "k": "この いぬは ちいさくない です", "r": ["kono inu wa chiisakunai desu"], "e": "This dog is not small", "a": ["this dog is not small", "this dog isnt small"], "p": true, "b": 2}, {"t": "descphrase", "k": "これは ちいさい いぬ です", "r": ["kore wa chiisai inu desu"], "e": "This is a small dog", "a": ["this is a small dog", "this is a little dog"], "p": true, "b": 2}, {"t": "descphrase", "k": "これは ちいさい いぬ ではない です", "r": ["kore wa chiisai inu dewa nai desu"], "e": "This is not a small dog", "a": ["this is not a small dog", "this isnt a small dog"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はしは たかい です", "r": ["kono hashi wa takai desu"], "e": "This bridge is high", "a": ["this bridge is high", "this bridge is tall"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はしは たかくない です", "r": ["kono hashi wa takakunai desu"], "e": "This bridge is not high", "a": ["this bridge is not high", "this bridge isnt high", "this bridge is not tall"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はしは ひくい です", "r": ["kono hashi wa hikui desu"], "e": "This bridge is low", "a": ["this bridge is low"], "p": true, "b": 2}, {"t": "descphrase", "k": "この はしは ひくくない です", "r": ["kono hashi wa hikukunai desu"], "e": "This bridge is not low", "a": ["this bridge is not low", "this bridge isnt low"], "p": true, "b": 2}, {"t": "common", "k": "げんき", "r": ["genki"], "e": "well / healthy", "a": ["well", "healthy", "fine", "good", "energetic", "genki"], "p": false, "b": 3, "kj": "元気"}, {"t": "common", "k": "よい", "r": ["yoi"], "e": "good", "a": ["good", "nice"], "p": false, "b": 3, "kj": "良い"}, {"t": "common", "k": "わるい", "r": ["warui"], "e": "bad", "a": ["bad"], "p": false, "b": 3, "kj": "悪い"}, {"t": "common", "k": "どう", "r": ["dou"], "e": "how?", "a": ["how", "how is it", "how about", "what about"], "p": false, "b": 3}, {"t": "common", "k": "すき", "r": ["suki", "sukidesu"], "e": "like", "a": ["like", "to like", "i like"], "p": false, "b": 3, "kj": "好き"}, {"t": "common", "k": "すきではない", "r": ["sukidewanai", "sukidewanaidesu", "sukijanai"], "e": "don't like", "a": ["dont like", "do not like", "dislike", "not like", "i dont like"], "p": false, "b": 3, "kj": "好きではない"}, {"t": "common", "k": "ではない", "r": ["dewanai", "janai"], "e": "is not", "a": ["is not", "isnt", "not", "am not", "are not"], "p": false, "b": 3}, {"t": "common", "k": "さい", "r": ["sai"], "e": "years old", "a": ["years old", "year old", "age"], "p": false, "b": 3, "kj": "歳"}, {"t": "chores", "k": "いきました", "r": ["ikimashita"], "e": "went (polite)", "a": ["went", "i went", "gone"], "p": false, "b": 3, "kj": "行きました"}, {"t": "days", "k": "なんようび", "r": ["nanyoubi"], "e": "what day of the week?", "a": ["what day", "what day of the week", "what day is it", "which day"], "p": false, "b": 3, "kj": "何曜日"}, {"t": "oclock", "k": "なんじ", "r": ["nanji"], "e": "what time?", "a": ["what time", "what time is it"], "p": false, "b": 3, "kj": "何時"}, {"t": "min", "k": "なんぷん", "r": ["nanpun"], "e": "what minute?", "a": ["what minute", "what minutes", "how many minutes"], "p": false, "b": 3, "kj": "何分"}, {"t": "month", "k": "なんがつ", "r": ["nangatsu"], "e": "what month?", "a": ["what month", "which month"], "p": false, "b": 3, "kj": "何月"}, {"t": "weather", "k": "てんき", "r": ["tenki"], "e": "weather", "a": ["weather", "the weather"], "p": false, "b": 3, "kj": "天気"}, {"t": "reltime", "k": "いちにち", "r": ["ichinichi"], "e": "one day / a day", "a": ["one day", "a day", "day", "1 day"], "p": false, "b": 3, "kj": "一日"}, {"t": "things", "k": "そら", "r": ["sora"], "e": "sky", "a": ["sky", "the sky"], "p": false, "b": 3, "kj": "空"}, {"t": "things", "k": "にほん", "r": ["nihon"], "e": "Japan", "a": ["japan", "nihon"], "p": false, "b": 3, "kj": "日本"}, {"t": "katakana", "k": "ラーメン", "r": ["raamen"], "e": "ramen", "a": ["ramen", "ramen noodles", "noodles"], "p": false, "b": 3}, {"t": "katakana", "k": "サラダ", "r": ["sarada"], "e": "salad", "a": ["salad"], "p": false, "b": 3}, {"t": "katakana", "k": "ワイン", "r": ["wain"], "e": "wine", "a": ["wine"], "p": false, "b": 3}, {"t": "katakana", "k": "スパイダー", "r": ["supaidaa"], "e": "spider", "a": ["spider", "spiders"], "p": false, "b": 3}, {"t": "katakana", "k": "パイロット", "r": ["pairotto"], "e": "pilot", "a": ["pilot"], "p": false, "b": 3}, {"t": "katakana", "k": "フライト", "r": ["furaito"], "e": "flight", "a": ["flight", "a flight"], "p": false, "b": 3}, {"t": "wild", "k": "おおもり", "r": ["oomori"], "e": "large serving", "a": ["large serving", "large portion", "big serving", "big portion", "large size", "large"], "p": false, "b": 4, "kj": "大盛り"}, {"t": "life", "k": "ともだち", "r": ["tomodachi"], "e": "friend", "a": ["friend", "friends"], "p": false, "b": 5, "kj": "友達"}, {"t": "life", "k": "べんきょう", "r": ["benkyou"], "e": "study", "a": ["study", "studying"], "p": false, "b": 5, "kj": "勉強"}, {"t": "life", "k": "うんどう", "r": ["undou"], "e": "exercise", "a": ["exercise", "workout", "working out"], "p": false, "b": 5, "kj": "運動"}, {"t": "life", "k": "たいせつ", "r": ["taisetsu"], "e": "important", "a": ["important", "precious"], "p": false, "b": 5, "kj": "大切"}, {"t": "life", "k": "たいせつな", "r": ["taisetsuna"], "e": "important (+noun)", "a": ["important"], "p": false, "b": 5, "kj": "大切な"}, {"t": "life", "k": "でんしゃ", "r": ["densha"], "e": "train", "a": ["train", "trains"], "p": false, "b": 5, "kj": "電車"}, {"t": "life", "k": "はやい", "r": ["hayai"], "e": "fast", "a": ["fast", "quick", "speedy", "early"], "p": false, "b": 5, "kj": "速い"}, {"t": "life", "k": "おそい", "r": ["osoi"], "e": "slow", "a": ["slow", "late"], "p": false, "b": 5, "kj": "遅い"}, {"t": "life", "k": "します", "r": ["shimasu", "suru"], "e": "(to) do", "a": ["do", "to do", "does", "doing"], "p": false, "b": 5}, {"t": "life", "k": "しごと", "r": ["shigoto"], "e": "work / job", "a": ["work", "job"], "p": false, "b": 5, "kj": "仕事"}, {"t": "life", "k": "いっしゅうかんに", "r": ["isshuukanni"], "e": "per week", "a": ["per week", "in one week", "in a week", "weekly", "a week"], "p": false, "b": 5, "kj": "一週間に"}, {"t": "life", "k": "にかい", "r": ["nikai"], "e": "twice", "a": ["twice", "two times", "2 times"], "p": false, "b": 5, "kj": "二回"}, {"t": "life", "k": "わたしは １しゅうかんに ２かい うんどうします", "r": ["watashi wa isshuukan ni nikai undou shimasu"], "e": "I exercise twice a week.", "a": ["i exercise twice a week", "i do exercise twice a week", "i work out twice a week", "twice a week i exercise"], "p": true, "b": 5}, {"t": "body", "k": "からだ", "r": ["karada"], "e": "body", "a": ["body", "the body"], "p": false, "b": 5, "kj": "体"}, {"t": "body", "k": "むね", "r": ["mune"], "e": "chest", "a": ["chest"], "p": false, "b": 5, "kj": "胸"}, {"t": "body", "k": "せなか", "r": ["senaka"], "e": "back", "a": ["back", "the back"], "p": false, "b": 5, "kj": "背中"}, {"t": "body", "k": "こし", "r": ["koshi"], "e": "waist", "a": ["waist", "lower back", "hip", "hips"], "p": false, "b": 5, "kj": "腰"}, {"t": "body", "k": "て", "r": ["te"], "e": "hand", "a": ["hand", "hands"], "p": false, "b": 5, "kj": "手"}, {"t": "body", "k": "あし", "r": ["ashi"], "e": "leg", "a": ["leg", "legs", "foot", "feet"], "p": false, "b": 5, "kj": "足"}, {"t": "life", "k": "おんがく", "r": ["ongaku"], "e": "music", "a": ["music"], "p": false, "b": 6, "kj": "音楽"}, {"t": "chores", "k": "ききます", "r": ["kikimasu"], "e": "listen (polite)", "a": ["listen", "to listen", "listen to", "hear"], "p": false, "b": 6, "kj": "聞きます"}, {"t": "chores", "k": "ききません", "r": ["kikimasen"], "e": "don't listen (polite)", "a": ["dont listen", "do not listen", "not listen", "dont hear"], "p": false, "b": 6, "kj": "聞きません"}, {"t": "chores", "k": "きく", "r": ["kiku"], "e": "listen (casual)", "a": ["listen", "to listen", "hear"], "p": false, "b": 6, "kj": "聞く"}, {"t": "chores", "k": "きかない", "r": ["kikanai"], "e": "don't listen (casual)", "a": ["dont listen", "do not listen", "not listen"], "p": false, "b": 6, "kj": "聞かない"}, {"t": "chores", "k": "みます", "r": ["mimasu"], "e": "watch / look (polite)", "a": ["watch", "look", "see", "look at"], "p": false, "b": 6, "kj": "見ます"}, {"t": "chores", "k": "みません", "r": ["mimasen"], "e": "don't watch (polite)", "a": ["dont watch", "do not watch", "not watch", "dont look", "dont see"], "p": false, "b": 6, "kj": "見ません"}, {"t": "things", "k": "いえ", "r": ["ie"], "e": "house", "a": ["house", "home"], "p": false, "b": 6, "kj": "家"}, {"t": "chores", "k": "いきます", "r": ["ikimasu"], "e": "go / to go to (polite)", "a": ["go", "to go", "to go to", "goes", "going"], "p": false, "b": 6, "kj": "行きます"}, {"t": "common", "k": "そして", "r": ["soshite"], "e": "and (sentence joiner)", "a": ["and", "and then", "and so"], "p": false, "b": 6}, {"t": "common", "k": "と", "r": ["to"], "e": "and (nouns)", "a": ["and", "with"], "p": false, "b": 6}, {"t": "common", "k": "いちばん", "r": ["ichiban"], "e": "favourite", "a": ["favourite", "favorite", "fav", "number one", "the most"], "p": false, "b": 6, "kj": "一番"}, {"t": "focus", "k": "まいにち", "r": ["mainichi"], "e": "everyday", "a": ["everyday", "every day", "daily"], "p": false, "b": 5, "kj": "毎日"}, {"t": "color", "k": "いろ", "r": ["iro"], "e": "colour", "a": ["colour", "color", "colours", "colors"], "p": false, "b": 7, "kj": "色"}, {"t": "color", "k": "くろ", "r": ["kuro"], "e": "black", "a": ["black"], "p": false, "b": 7, "kj": "黒"}, {"t": "color", "k": "しろ", "r": ["shiro"], "e": "white", "a": ["white"], "p": false, "b": 7, "kj": "白"}, {"t": "color", "k": "あか", "r": ["aka"], "e": "red", "a": ["red"], "p": false, "b": 7, "kj": "赤"}, {"t": "color", "k": "あお", "r": ["ao"], "e": "blue", "a": ["blue"], "p": false, "b": 7, "kj": "青"}, {"t": "color", "k": "きいろ", "r": ["kiiro"], "e": "yellow", "a": ["yellow"], "p": false, "b": 7, "kj": "黄色"}, {"t": "color", "k": "みどり", "r": ["midori"], "e": "green", "a": ["green"], "p": false, "b": 7, "kj": "緑"}, {"t": "common", "k": "ときどき", "r": ["tokidoki"], "e": "sometimes", "a": ["sometimes", "occasionally", "at times", "from time to time"], "p": false, "b": 8, "kj": "時々"}, {"t": "common", "k": "たぶん", "r": ["tabun"], "e": "maybe", "a": ["maybe", "probably", "perhaps"], "p": false, "b": 8, "kj": "多分"}, {"t": "common", "k": "すごい", "r": ["sugoi"], "e": "amazing / great", "a": ["amazing", "great", "awesome", "wow", "incredible", "cool"], "p": false, "b": 8, "kj": "凄い"}, {"t": "chores", "k": "たべる", "r": ["taberu"], "e": "eat (casual)", "a": ["eat", "to eat", "eats", "eating"], "p": false, "b": 8, "kj": "食べる"}, {"t": "chores", "k": "たべます", "r": ["tabemasu"], "e": "eat (polite)", "a": ["eat", "to eat", "eats", "eating"], "p": false, "b": 8, "kj": "食べます"}, {"t": "chores", "k": "たべない", "r": ["tabenai"], "e": "don't eat (casual)", "a": ["dont eat", "do not eat", "not eat"], "p": false, "b": 8, "kj": "食べない"}, {"t": "chores", "k": "たべません", "r": ["tabemasen"], "e": "don't eat (polite)", "a": ["dont eat", "do not eat", "not eat"], "p": false, "b": 8, "kj": "食べません"}, {"t": "chores", "k": "たべた", "r": ["tabeta"], "e": "ate (casual)", "a": ["ate", "did eat", "eaten", "have eaten"], "p": false, "b": 8, "kj": "食べた"}, {"t": "chores", "k": "たべました", "r": ["tabemashita"], "e": "ate (polite)", "a": ["ate", "did eat", "eaten", "have eaten"], "p": false, "b": 8, "kj": "食べました"}, {"t": "chores", "k": "あります", "r": ["arimasu"], "e": "there is / have — objects (polite)", "a": ["there is", "there are", "exists", "have", "has", "theres"], "p": false, "b": 8}, {"t": "chores", "k": "ありません", "r": ["arimasen"], "e": "there isn't / don't have — objects (polite)", "a": ["there isnt", "there is not", "there are not", "dont have", "do not have", "not exist", "none"], "p": false, "b": 8}, {"t": "chores", "k": "います", "r": ["imasu"], "e": "there is / have — people & animals (polite)", "a": ["there is", "there are", "exists", "have", "has", "theres"], "p": false, "b": 8}, {"t": "chores", "k": "いません", "r": ["imasen"], "e": "there isn't / don't have — people & animals (polite)", "a": ["there isnt", "there is not", "there are not", "dont have", "do not have", "not exist", "none"], "p": false, "b": 8}, {"t": "weather", "k": "さむい", "r": ["samui"], "e": "cold", "a": ["cold"], "p": false, "b": 8, "kj": "寒い"}, {"t": "weather", "k": "さむくない", "r": ["samukunai"], "e": "not cold", "a": ["not cold", "isnt cold", "is not cold"], "p": false, "b": 8, "kj": "寒くない"}, {"t": "weather", "k": "あつい", "r": ["atsui"], "e": "hot", "a": ["hot"], "p": false, "b": 8, "kj": "暑い"}, {"t": "weather", "k": "あつくない", "r": ["atsukunai"], "e": "not hot", "a": ["not hot", "isnt hot", "is not hot"], "p": false, "b": 8, "kj": "暑くない"}, {"t": "common", "k": "たくさん", "r": ["takusan"], "e": "many / a lot", "a": ["many", "a lot", "lots", "lots of", "much", "plenty"], "p": false, "b": 9, "kj": "沢山"}, {"t": "life", "k": "あさごはん", "r": ["asagohan"], "e": "breakfast", "a": ["breakfast", "morning meal"], "p": false, "b": 9, "kj": "朝ご飯"}, {"t": "things", "k": "みち", "r": ["michi"], "e": "road / street / path", "a": ["road", "street", "path", "way"], "p": false, "b": 9, "kj": "道"}, {"t": "adj", "k": "ひろい", "r": ["hiroi"], "e": "wide", "a": ["wide", "spacious", "broad"], "p": false, "b": 9, "kj": "広い"}, {"t": "adj", "k": "せまい", "r": ["semai"], "e": "narrow", "a": ["narrow", "cramped", "tight"], "p": false, "b": 9, "kj": "狭い"}, {"t": "chores", "k": "つくる", "r": ["tsukuru"], "e": "make (casual)", "a": ["make", "to make", "makes", "making", "cook"], "p": false, "b": 9, "kj": "作る"}, {"t": "chores", "k": "つくります", "r": ["tsukurimasu"], "e": "make (polite)", "a": ["make", "to make", "makes", "making", "cook"], "p": false, "b": 9, "kj": "作ります"}, {"t": "chores", "k": "つくらない", "r": ["tsukuranai"], "e": "don't make (casual)", "a": ["dont make", "do not make", "not make"], "p": false, "b": 9, "kj": "作らない"}, {"t": "chores", "k": "つくりません", "r": ["tsukurimasen"], "e": "don't make (polite)", "a": ["dont make", "do not make", "not make"], "p": false, "b": 9, "kj": "作りません"}, {"t": "chores", "k": "のむ", "r": ["nomu"], "e": "drink (casual)", "a": ["drink", "to drink", "drinks", "drinking"], "p": false, "b": 9, "kj": "飲む"}, {"t": "chores", "k": "のみます", "r": ["nomimasu"], "e": "drink (polite)", "a": ["drink", "to drink", "drinks", "drinking"], "p": false, "b": 9, "kj": "飲みます"}, {"t": "chores", "k": "のまない", "r": ["nomanai"], "e": "don't drink (casual)", "a": ["dont drink", "do not drink", "not drink"], "p": false, "b": 9, "kj": "飲まない"}, {"t": "chores", "k": "のみません", "r": ["nomimasen"], "e": "don't drink (polite)", "a": ["dont drink", "do not drink", "not drink"], "p": false, "b": 9, "kj": "飲みません"}, {"t": "chores", "k": "よむ", "r": ["yomu"], "e": "read (casual)", "a": ["read", "to read", "reads", "reading"], "p": false, "b": 9, "kj": "読む"}, {"t": "chores", "k": "よみます", "r": ["yomimasu"], "e": "read (polite)", "a": ["read", "to read", "reads", "reading"], "p": false, "b": 9, "kj": "読みます"}, {"t": "chores", "k": "よまない", "r": ["yomanai"], "e": "don't read (casual)", "a": ["dont read", "do not read", "not read"], "p": false, "b": 9, "kj": "読まない"}, {"t": "chores", "k": "よみません", "r": ["yomimasen"], "e": "don't read (polite)", "a": ["dont read", "do not read", "not read"], "p": false, "b": 9, "kj": "読みません"}, {"t": "chores", "k": "おきる", "r": ["okiru"], "e": "get up / wake up (casual)", "a": ["get up", "wake up", "wake", "arise", "awaken"], "p": false, "b": 9, "kj": "起きる"}, {"t": "chores", "k": "おきます", "r": ["okimasu"], "e": "get up / wake up (polite)", "a": ["get up", "wake up", "wake", "arise", "awaken"], "p": false, "b": 9, "kj": "起きます"}, {"t": "life", "k": "せんせい", "r": ["sensei"], "e": "teacher", "a": ["teacher", "sensei", "instructor"], "p": false, "b": 9, "kj": "先生"}, {"t": "katakana", "k": "クラスルーム", "r": ["kurasuruumu"], "e": "classroom", "a": ["classroom", "class room"], "p": false, "b": 9}, {"t": "phrase", "k": "クラスルームに たくさん PC が あります。", "r": ["kurasuruumu ni takusan pc ga arimasu"], "e": "There are many PCs in the classroom.", "a": ["there are many pcs in the classroom", "there are lots of pcs in the classroom", "the classroom has many pcs"], "p": true, "b": 9}, {"t": "phrase", "k": "クラスルームに たくさん せんせい が います。", "r": ["kurasuruumu ni takusan sensei ga imasu"], "e": "There are many teachers in the classroom.", "a": ["there are many teachers in the classroom", "there are lots of teachers in the classroom", "the classroom has many teachers"], "p": true, "b": 9}, {"t": "phrase", "k": "かれは たくさん i-phone が あります。", "r": ["kare wa takusan iphone ga arimasu"], "e": "He has many iPhones.", "a": ["he has many iphones", "he has lots of iphones", "he has a lot of iphones"], "p": true, "b": 9}, {"t": "phrase", "k": "かれは たくさん ともだち が います。", "r": ["kare wa takusan tomodachi ga imasu"], "e": "He has many friends.", "a": ["he has many friends", "he has lots of friends", "he has a lot of friends"], "p": true, "b": 9}, {"t": "phrase", "k": "わたしの ともだちは タスマニアに いえ が あります。", "r": ["watashi no tomodachi wa tasumania ni ie ga arimasu"], "e": "My friend has a house in Tasmania.", "a": ["my friend has a house in tasmania", "my friend has a house in tas"], "p": true, "b": 9}, {"t": "phrase", "k": "かのじょは まいにち あさごはん つくります。", "r": ["kanojo wa mainichi asagohan tsukurimasu"], "e": "She makes breakfast every day.", "a": ["she makes breakfast every day", "she cooks breakfast every day"], "p": true, "b": 9}, {"t": "phrase", "k": "かのじょは まいにち あさごはん つくりません。", "r": ["kanojo wa mainichi asagohan tsukurimasen"], "e": "She doesn't make breakfast every day.", "a": ["she doesnt make breakfast every day", "she does not make breakfast every day", "she doesnt cook breakfast every day"], "p": true, "b": 9}, {"t": "phrase", "k": "かれは まいにち なんじ おきますか。", "r": ["kare wa mainichi nanji okimasu ka"], "e": "What time does he get up every day?", "a": ["what time does he get up every day", "what time does he wake up every day", "what time does he get up each day"], "p": true, "b": 9}, {"t": "common", "k": "いままで", "r": ["imamade"], "e": "so far / until now", "a": ["so far", "until now", "up to now", "up until now"], "p": false, "b": 10, "kj": "今まで"}, {"t": "adj", "k": "ふとい", "r": ["futoi"], "e": "thick", "a": ["thick", "fat"], "p": false, "b": 10, "kj": "太い"}, {"t": "adj", "k": "ふとくない", "r": ["futokunai"], "e": "not thick", "a": ["not thick", "isnt thick", "is not thick"], "p": false, "b": 10, "kj": "太くない"}, {"t": "chores", "k": "ねる", "r": ["neru"], "e": "sleep / go to bed (casual)", "a": ["sleep", "go to bed", "to sleep", "sleeps", "sleeping"], "p": false, "b": 10, "kj": "寝る"}, {"t": "chores", "k": "ねます", "r": ["nemasu"], "e": "sleep / go to bed (polite)", "a": ["sleep", "go to bed", "to sleep", "sleeps", "sleeping"], "p": false, "b": 10, "kj": "寝ます"}, {"t": "chores", "k": "ねない", "r": ["nenai"], "e": "don't sleep (casual)", "a": ["dont sleep", "do not sleep", "not sleep", "dont go to bed"], "p": false, "b": 10, "kj": "寝ない"}, {"t": "chores", "k": "ねません", "r": ["nemasen"], "e": "don't sleep (polite)", "a": ["dont sleep", "do not sleep", "not sleep", "dont go to bed"], "p": false, "b": 10, "kj": "寝ません"}, {"t": "chores", "k": "きる", "r": ["kiru"], "e": "wear / put on (casual)", "a": ["wear", "put on", "get dressed", "to wear", "wears", "wearing"], "p": false, "b": 10, "kj": "着る"}, {"t": "chores", "k": "きます", "r": ["kimasu"], "e": "wear / put on (polite)", "a": ["wear", "put on", "get dressed", "to wear", "wears", "wearing"], "p": false, "b": 10, "kj": "着ます"}, {"t": "chores", "k": "きない", "r": ["kinai"], "e": "don't wear (casual)", "a": ["dont wear", "do not wear", "not wear", "dont put on"], "p": false, "b": 10, "kj": "着ない"}, {"t": "chores", "k": "きません", "r": ["kimasen"], "e": "don't wear (polite)", "a": ["dont wear", "do not wear", "not wear", "dont put on"], "p": false, "b": 10, "kj": "着ません"}, {"t": "adj", "k": "おもしろい", "r": ["omoshiroi"], "e": "interesting / funny", "a": ["interesting", "funny", "fun", "amusing"], "p": false, "b": 11, "kj": "面白い"}, {"t": "adj", "k": "なつかしい", "r": ["natsukashii", "natsukashi"], "e": "nostalgic", "a": ["nostalgic", "nostalgia", "brings back memories", "takes me back"], "p": false, "b": 11, "kj": "懐かしい"}, {"t": "common", "k": "むかし", "r": ["mukashi"], "e": "long ago", "a": ["long ago", "the past", "old days", "olden days", "former times", "once", "a long time ago"], "p": false, "b": 11, "kj": "昔"}, {"t": "common", "k": "かこ", "r": ["kako"], "e": "the past", "a": ["the past", "past", "past tense", "former times", "one's past"], "p": false, "b": 11, "kj": "過去"}, {"t": "adj", "k": "ほそい", "r": ["hosoi"], "e": "thin", "a": ["thin", "slender", "skinny"], "p": false, "b": 12, "kj": "細い"}, {"t": "things", "k": "へや", "r": ["heya"], "e": "room", "a": ["room"], "p": false, "b": 12, "kj": "部屋"}, {"t": "adj", "k": "くらい", "r": ["kurai"], "e": "dark", "a": ["dark", "gloomy"], "p": false, "b": 12, "kj": "暗い"}, {"t": "adj", "k": "あかるい", "r": ["akarui"], "e": "bright", "a": ["bright", "cheerful"], "p": false, "b": 12, "kj": "明るい"}, {"t": "fam", "k": "おや", "r": ["oya"], "e": "parent", "a": ["parent", "parents"], "p": false, "b": 12, "kj": "親"}, {"t": "phrase", "k": "おやのいえに", "r": ["oyanoieni", "oya no ie ni"], "e": "to my parents' house", "a": ["to my parents house", "to my parent's house", "to the parents house"], "p": true, "b": 12}, {"t": "common", "k": "では", "r": ["dewa"], "e": "well then / right then", "a": ["well then", "right then", "now then", "in that case", "so then", "well now", "then"], "p": false, "b": 12}, {"t": "life", "k": "れきし", "r": ["rekishi"], "e": "history", "a": ["history"], "p": false, "b": 13, "kj": "歴史"}];
+const TOPICS = [{"id": "focus", "jp": "しゅうちゅう", "en": "Focus words"}, {"id": "flow", "jp": "じかんのながれ", "en": "Flow of time"}, {"id": "greet", "jp": "あいさつ", "en": "Greetings"}, {"id": "reltime", "jp": "きのう・きょう", "en": "Relative time"}, {"id": "subj", "jp": "しゅご", "en": "Pronouns (subject)"}, {"id": "poss", "jp": "しょゆうかく", "en": "Pronouns (possessive)"}, {"id": "demo", "jp": "これ・それ・あれ", "en": "Demonstratives"}, {"id": "fam", "jp": "かぞく", "en": "Family"}, {"id": "days", "jp": "ようび", "en": "Days of the week"}, {"id": "num", "jp": "かず", "en": "Numbers 1-12"}, {"id": "oclock", "jp": "なんじ", "en": "Time (o'clock)"}, {"id": "min", "jp": "なんぷん", "en": "Minutes"}, {"id": "month", "jp": "なんがつ", "en": "Months"}, {"id": "weather", "jp": "てんき", "en": "Weather"}, {"id": "season", "jp": "きせつ", "en": "Seasons"}, {"id": "dir", "jp": "ほうこう", "en": "Direction"}, {"id": "common", "jp": "ことば", "en": "Common words"}, {"id": "chores", "jp": "どうし", "en": "Verbs"}, {"id": "adj", "jp": "けいようし", "en": "Adjectives"}, {"id": "body", "jp": "からだ", "en": "Body & face"}, {"id": "things", "jp": "もの", "en": "Things"}, {"id": "color", "jp": "いろ", "en": "Colours"}, {"id": "katakana", "jp": "カタカナ", "en": "Katakana words"}, {"id": "life", "jp": "せいかつ", "en": "Daily life"}, {"id": "wild", "jp": "そとのことば", "en": "From the wild"}, {"id": "descphrase", "jp": "ようすの ぶん", "en": "Describing things"}, {"id": "phrase", "jp": "ぶん", "en": "Phrases & sentences"}];
+const BATCHES=[
+ {id:1,label:"Starter sheet",date:"Jun 7"},
+ {id:2,label:"Adjectives & describing",date:"Jun 7"},
+ {id:3,label:"Words from sentences",date:"Jun 7"},
+ {id:4,label:"From the wild",date:"Jun 8"},
+ {id:5,label:"Daily life & body",date:"Jun 8"},
+ {id:6,label:"Music & verbs",date:"Jun 11"},
+ {id:7,label:"Colours",date:"Jun 15"},
+ {id:8,label:"Tango 2",date:"Jun 15"},
+ {id:9,label:"Lesson Jun 18",date:"Jun 18"},
+ {id:10,label:"Lesson Jun 23",date:"Jun 23"},
+ {id:11,label:"Overheard (Jun 25)",date:"Jun 25"},
+ {id:12,label:"Lesson Jun 28",date:"Jun 28"},
+ {id:13,label:"Genki textbook",date:"Jun 29"}
+];
+
+
+// add primary english into the accept list, lowercased
+DATA.forEach(function(it){
+  it.a = (it.a && it.a.length) ? it.a.slice() : [];
+  it.a.unshift(it.e);
+});
+const TOPIC_BY_ID = {}; TOPICS.forEach(t=>TOPIC_BY_ID[t.id]=t);
+const ITEMS_BY_TOPIC = {}; TOPICS.forEach(t=>ITEMS_BY_TOPIC[t.id]=[]);
+DATA.forEach(it=>ITEMS_BY_TOPIC[it.t].push(it));
+
+/* ---------- matching ---------- */
+function lev(a,b){
+  const m=a.length,n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev=new Array(n+1), cur=new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      const cost=a[i-1]===b[j-1]?0:1;
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost);
+    }
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+function canonRomaji(s){
+  s=(s||'').toLowerCase().replace(/[^a-z]/g,'');
+  const reps=[['tsu','tu'],['sha','sya'],['shu','syu'],['sho','syo'],
+    ['cha','tya'],['chu','tyu'],['cho','tyo'],
+    ['jya','zya'],['jyu','zyu'],['jyo','zyo'],
+    ['ja','zya'],['ju','zyu'],['jo','zyo'],
+    ['shi','si'],['chi','ti'],['ti','ti'],['ji','zi'],['di','zi'],['du','zu'],
+    ['fu','hu'],['wo','o']];
+  for(const [a,b] of reps) s=s.split(a).join(b);
+  s=s.split('ou').join('o');
+  let prev;
+  do{prev=s;
+    s=s.split('aa').join('a').split('ii').join('i').split('uu').join('u')
+       .split('ee').join('e').split('oo').join('o');
+  }while(s!==prev);
+  return s;
+}
+function normEn(s){
+  s=(s||'').toLowerCase().trim();
+  s=s.replace(/[’'`]/g,'');
+  s=s.replace(/[^a-z0-9 ]/g,' ');
+  s=s.replace(/\b(a|an|the)\b/g,' ');
+  s=s.replace(/\s+/g,'');
+  return s;
+}
+function classify(d,len){
+  if(d===0) return 1;
+  const thr=Math.max(1, Math.floor(len/8));
+  if(d<=thr) return 0.5;
+  return 0;
+}
+function gradeRomaji(input, accepts){
+  const ci=canonRomaji(input); if(!ci) return 0;
+  let best=Infinity, blen=0;
+  accepts.forEach(a=>{const ca=canonRomaji(a);const d=lev(ci,ca);if(d<best){best=d;blen=ca.length;}});
+  return classify(best,blen);
+}
+function gradeEn(input, accepts){
+  const ci=normEn(input); if(!ci) return 0;
+  let best=Infinity, blen=0;
+  accepts.forEach(a=>{const ca=normEn(a);const d=lev(ci,ca);if(d<best){best=d;blen=ca.length;}});
+  return classify(best,blen);
+}
+
+/* ---------- helpers ---------- */
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const $=id=>document.getElementById(id);
+
+/* ---------- menu ---------- */
+let checks={};
+let batchSel={};
+let showHint=false;
+let wordsOnly=false;
+let smartMode=false;
+let STATS={};
+try{
+  STATS=JSON.parse(localStorage.getItem('jq_stats_v1'))||{};
+  wordsOnly=localStorage.getItem('jq_words')==='1';
+  smartMode=localStorage.getItem('jq_smart')==='1';
+}catch(e){ STATS={}; }
+function saveStats(){ try{ localStorage.setItem('jq_stats_v1', JSON.stringify(STATS)); }catch(e){} }
+const BOX_INTERVALS=[0, 10*60*1000, 86400000, 3*86400000, 7*86400000, 14*86400000];
+const BOX_WEIGHTS=[16,8,4,2,1,0.5];
+function statKey(it,mode){ return it.k+'|'+mode; }
+function applyScoreToBox(box,score){ if(score>=1) return Math.min(box+1,5); if(score>=0.5) return box; return 0; }
+function weightFor(it,mode){
+  const s=STATS[statKey(it,mode)];
+  if(!s) return 6;
+  const box=Math.max(0,Math.min(5,s[0]));
+  const due=(Date.now()-s[1])>=BOX_INTERVALS[box];
+  return BOX_WEIGHTS[box]*(due?2:1);
+}
+function recordAnswer(e){
+  const k=statKey(e.it,e.mode);
+  const s=STATS[k]||[0,0,0,0];
+  if(e._pb===undefined){ e._pb=s[0]; e._ps=s[2]; e._pm=s[3]; }
+  STATS[k]=[applyScoreToBox(e._pb,e.score), Date.now(), e._ps+1, e._pm+(e.score===0?1:0)];
+  saveStats();
+}
+const DEFAULT_HINTS={
+ "れきし":"れきし rekishi = HISTORY. 歴史 = 歴 (passage of time) + 史 (chronicle/record) → a record of times past. (From Genki.)",
+ "では":"では (dewa) = WELL THEN / right then / in that case — the marker that kicks things off: では、はじめましょう = ‘right then, let’s begin.’ Casual contraction: じゃあ (jaa). NOT the same as ではない (dewa nai) = ‘is not’.",
+ "ほそい":"細い hosoi = THIN / slender. 細 = 糸(thread) + 田 → thin as a thread. (opp. ふとい futoi = thick)",
+ "へや":"部屋 heya = ROOM. 部(section) + 屋(building) = a sectioned space under a roof. (special reading: heya)",
+ "くらい":"暗い kurai = DARK. 日(sun) + 音(sound) → the sun shut away = dark. A ‘dark’/gloomy person = introvert. (opp. 明るい)",
+ "あかるい":"明るい akarui = BRIGHT. 日(sun) + 月(moon) together = light. A ‘bright’ person = cheerful/extrovert. (opp. 暗い)",
+ "おや":"親 oya = PARENT. 立(stand) + 木(tree) + 見(see): a parent stands watching over you. (おやのいえに = to my parents’ house)",
+ "おやのいえに":"親(oya) の 家(ie) に = to my parents’ house. の = ’s, に = to/at.",
+ "いっしゅうかんに":"一週間 isshuukan = one week (一 ichi → いっ before しゅう: the ち becomes a small っ). + に = ‘per’ → PER WEEK.",
+ "にかい":"二回 = に(2) + かい(=times) → TWICE. (に doesn’t change — unlike 一/六/八/十.)",
+ "あさ":"朝 — 十+日(sun)+十+月 packed together: the sun climbing through the grass at dawn = MORNING.",
+ "ひる":"昼 — a ruler (尺) over 日(sun): the sun at its measured high point = NOON.",
+ "よる":"夜 — a person (亻) out under 夕(evening moon), lid on top = NIGHT.",
+ "いま":"今 — a roof/lid clapped over the present moment = NOW.",
+ "あした":"明日 — 明(bright: 日 sun + 月 moon) + 日(day) = the next bright day = TOMORROW.",
+ "わたし":"私 — 禾(grain) + 厶(private) = my own grain = I / me.",
+ "かれ":"彼 — 彳(a step) + 皮(skin) = that fellow stepping over there = HE.",
+ "おじいさん":"お祖父さん — 祖(ancestor) + 父(father) = grandfather. (special reading: jii)",
+ "おばあさん":"お祖母さん — 祖(ancestor) + 母(mother) = grandmother. (special reading: baa)",
+ "おとうさん":"お父さん — 父, a pair of crossed working arms = FATHER.",
+ "おかあさん":"お母さん — 母, a figure with two dots (a mother feeding) = MOTHER.",
+ "いち":"一 — a single horizontal stroke = 1.",
+ "に":"二 — two stacked strokes = 2.",
+ "さん":"三 — three stacked strokes = 3.",
+ "よん":"四 — a box with little legs penned inside = 4.",
+ "ご":"五 — a zig-zag locked between two bars = 5.",
+ "ろく":"六 — a pointy hat on two legs = 6.",
+ "なな":"七 — a cross with a hook, like a flipped 7.",
+ "はち":"八 — two strokes splaying apart, 8 opening up.",
+ "きゅう":"九 — a bent hook curling toward ten = 9.",
+ "じゅう":"十 — a full plus-sign cross = 10.",
+ "じゅういち":"十(10) + 一(1) = 11.",
+ "じゅうに":"十(10) + 二(2) = 12.",
+ "いちじ":"1 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "にじ":"2 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "さんじ":"3 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "よじ":"4 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "ごじ":"5 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "ろくじ":"6 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "しちじ":"7 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "はちじ":"8 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "くじ":"9 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "じゅうじ":"10 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "じゅういちじ":"11 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "じゅうにじ":"12 o'clock. Counter 時 = o'clock — 日(sun) + 寺(temple) = a sundial telling time.",
+ "ごぜん":"午前 — 午(noon) + 前(before) = before noon = AM.",
+ "ごご":"午後 — 午(noon) + 後(after) = after noon = PM.",
+ "いっぷん":"1 minute. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "にふん":"2 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "さんぷん":"3 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "よんぷん":"4 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "ごふん":"5 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "ろっぷん":"6 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "ななふん":"7 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "はっぷん":"8 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "きゅうふん":"9 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じっぷん":"10 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅういっぷん":"11 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうにふん":"12 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうさんぷん":"13 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうよんぷん":"14 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうごふん":"15 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうろっぷん":"16 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうななふん":"17 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうはっぷん":"18 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "じゅうきゅうふん":"19 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "にじゅっぷん":"20 minutes. Counter 分 = minute — 八(split) + 刀(knife) = time cut into parts.",
+ "いちがつ":"January. 月 = moon → also ‘month’.",
+ "にがつ":"February. 月 = moon → also ‘month’.",
+ "さんがつ":"March. 月 = moon → also ‘month’.",
+ "しがつ":"April. 月 = moon → also ‘month’.",
+ "ごがつ":"May. 月 = moon → also ‘month’.",
+ "ろくがつ":"June. 月 = moon → also ‘month’.",
+ "しちがつ":"July. 月 = moon → also ‘month’.",
+ "はちがつ":"August. 月 = moon → also ‘month’.",
+ "くがつ":"September. 月 = moon → also ‘month’.",
+ "じゅうがつ":"October. 月 = moon → also ‘month’.",
+ "じゅういちがつ":"November. 月 = moon → also ‘month’.",
+ "じゅうにがつ":"December. 月 = moon → also ‘month’.",
+ "ゆき":"雪 — 雨(rain) over 彐(a hand/broom): the rain you sweep = SNOW.",
+ "ひだり":"左 — a hand (ナ) holding 工(a carpenter's ruler) = the LEFT hand.",
+ "みぎ":"右 — a hand (ナ) over 口(mouth) = the hand you eat with = RIGHT.",
+ "かわいい":"可愛い — 可(can/approve) + 愛(love) = love-able = CUTE.",
+ "かわいくない":"可愛くない — 可愛い(cute) + くない = NOT cute.",
+ "こわい":"怖い — 忄(heart) + 布(cloth) = a heart wrapped in dread = SCARY.",
+ "こわくない":"怖くない — 怖い(scary) + くない = NOT scary.",
+ "だいじょうぶ":"大丈夫 — 大(big) + 丈夫(sturdy man) = a big sturdy fellow = it's OK / all good.",
+ "なまえ":"名前 — 名(name: 夕 evening + 口 mouth, calling out in the dark) + 前(front) = NAME.",
+ "かお":"顔 — 彦 + 頁(head/page) = the front sheet of your head = FACE.",
+ "め":"目 — a pictograph of an EYE stood upright (the bars are the pupil).",
+ "みみ":"耳 — a pictograph of an EAR.",
+ "いぬ":"犬 — 大(big) plus a dot (the collar) = DOG.",
+ "げんき":"元気 — 元(origin) + 気(spirit) = original energy = WELL / healthy.",
+ "よい":"良 — a scoop measuring out quality = GOOD.",
+ "わるい":"悪い — 亜(sub-/lesser) + 心(heart) = a lesser heart = BAD.",
+ "すき":"好き — 女(woman) + 子(child) = mother and child = fondness = to LIKE.",
+ "すきではない":"好きではない — 好き(like) + ではない(is not) = do NOT like.",
+ "てんき":"天気 — 天(sky/heaven) + 気(air/spirit) = the sky's mood = WEATHER.",
+ "いちにち":"一日 — 一(one) + 日(day) = one day.",
+ "そら":"空 — 穴(hole/cave) + 工 = the great hollow overhead = SKY / empty.",
+ "にほん":"日本 — 日(sun) + 本(origin/root) = the sun's origin = JAPAN.",
+ "ふとくない":"太くない — 太(大 big + an extra dot = even bigger = THICK) + くない = NOT thick.",
+ "ねない":"寝ない — 寝(sleep: under a 宀 roof on a 爿 bed) + ない = do NOT sleep.",
+ "ねません":"寝ません — polite NOT sleep (寝る → 寝ません).",
+ "きない":"着ない — 着(wear: layer wool over the 目) + ない = do NOT wear.",
+ "きません":"着ません — polite NOT wear (着る → 着ません).",
+ "かこ":"kako = THE PAST. kanji 過(pass)+去(leave) = 'passed & gone'. Opposite of 未来 mirai (future); also = past tense (過去形).",
+ "むかし":"mukashi = LONG AGO / the old days. 'MOO-ka-shi'. 昔々 (mukashi mukashi) opens fairy tales = once upon a time. (kanji: 昔)",
+ "なつかしい":"natsukashii = NOSTALGIC, 'ahh, takes me back!' Starts like 夏 natsu (summer) — think nostalgic childhood summers. (casual clip: なつい natsui)",
+ "おもしろい":"omoshiroi = INTERESTING / FUNNY — 'OH! MORE, SHOW!' you beg, it's so good. (Kansai clips it to おもろ omoro.)",
+ "いままで":"imamade = SO FAR / until now. ima(now) + made(until).",
+ "ふとい":"futoi = THICK (also fat for a person). FOO-toy chunky. (futokunai = not thick).",
+ "ねる":"neru = SLEEP / go to bed. NE-roll into bed. casual; polite = nemasu.",
+ "ねます":"nemasu = sleep (polite). casual = neru.",
+ "きる":"kiru = WEAR / put on (upper body). polite = kimasu. NOTE: kimasu also = COME (kuru)!",
+ "きます":"kimasu = wear (polite). casual = kiru. watch out: kimasu can also mean come!",
+ "げつようび":"Monday = GETSU(getsu=moon)youbi. Moon-day, like English. 1st.",
+ "かようび":"Tuesday = KA(ka=fire)youbi. 2nd day. (fire/Mars - French 'Mardi').",
+ "すいようび":"Wednesday = SUI(sui=water)youbi. 3rd day. SWE-water midweek.",
+ "きんようび":"Friday = KIN(kin=gold)youbi. gold = payday Friday! 5th.",
+ "どようび":"Saturday = DO(do=earth)youbi. SATURN-day = Saturday, like English. 6th.",
+ "にちようび":"Sunday = NICHI(nichi=sun)youbi. SUN-day = Sunday. same nichi as mainichi.",
+ "そうじします":"soujishimasu = clean (polite). casual = soujisuru.",
+ "そうじしません":"soujishimasen = don't clean (polite). casual = soujishinai.",
+ "せんたくします":"sentakushimasu = do the laundry (polite). casual = sentakusuru.",
+ "せんたくしません":"sentakushimasen = don't do the laundry (polite). casual = sentakushinai.",
+ "たべます":"tabemasu = eat (polite). casual = taberu.",
+ "たべません":"tabemasen = don't eat (polite). casual = tabenai.",
+ "たべました":"tabemashita = ate (polite). casual = tabeta.",
+ "つくります":"tsukurimasu = make (polite). casual = tsukuru.",
+ "つくりません":"tsukurimasen = don't make (polite). casual = tsukuranai.",
+ "のみます":"nomimasu = drink (polite). casual = nomu.",
+ "のみません":"nomimasen = don't drink (polite). casual = nomanai.",
+ "よみます":"yomimasu = read (polite). casual = yomu.",
+ "よみません":"yomimasen = don't read (polite). casual = yomanai.",
+ "おきます":"okimasu = get up / wake up (polite). casual = okiru.",
+ "たくさん":"takusan = MANY / a lot. tuck-san loads up plenty.",
+ "あさごはん":"asa(morning) + gohan(meal) = BREAKFAST.",
+ "みち":"michi = ROAD / path. follow the michi.",
+ "ひろい":"hiroi = WIDE / spacious. HE-ROW-i, open & broad. (semai = narrow).",
+ "せまい":"semai = NARROW / cramped. se-MY tight squeeze. (hiroi = wide).",
+ "つくる":"tsukuru = MAKE. tsukuru to tsukurimasu to tsukuranai.",
+ "つくらない":"tsukuranai = don't make. polite = tsukurimasen.",
+ "のむ":"nomu = DRINK (nom nom). nomu to nomimasu to nomanai.",
+ "のまない":"nomanai = don't drink. polite = nomimasen.",
+ "よむ":"yomu = READ. yomu to yomimasu to yomanai.",
+ "よまない":"yomanai = don't read. polite = yomimasen.",
+ "おきる":"okiru = GET UP / wake. okiru to okimasu (rise & shine).",
+ "せんせい":"sensei = TEACHER (Eiji is your sensei!).",
+ "クラスルーム":"kurasuruumu = CLASSROOM. classroom with extra vowels.",
+ "かのじょ":"kanojo = SHE / her (the person). Add の for the possessive (her ___).",
+ "たぶん":"tabun = MAYBE / probably. ta-BOON, who knows.",
+ "たべる":"taberu = EAT. ru-verb: taberu to tabemasu to tabenai to tabeta.",
+ "たべない":"tabenai = don't eat (taberu to tabenai). polite = tabemasen.",
+ "たべた":"tabeta = ATE (past). taberu to tabeta. polite = tabemashita.",
+ "あります":"arimasu = there is / have — for OBJECTS (non-living). People & animals use IMASU!",
+ "ありません":"arimasen = there isn't / don't have — objects (negative of arimasu).",
+ "います":"imasu = there is / have — for PEOPLE & ANIMALS (living, moving). Objects use ARIMASU!",
+ "いません":"imasen = there isn't — people & animals (negative of imasu).",
+ "さむい":"samui = COLD (weather). brrr, sa-MUI. (atsui = hot).",
+ "さむくない":"samui to samukunai = NOT cold.",
+ "あつい":"atsui = HOT. AT-sui, so hot! (samui = cold).",
+ "あつくない":"atsui to atsukunai = NOT hot.",
+ "すごい":"sugoi = AMAZING / great / wow. you'll hear SUGOI constantly.",
+ "ときどき":"toki = time; tokidoki (time-time) = SOMETIMES / now and then.",
+ "いろ":"iro = COLOUR (the category itself).",
+ "くろ":"kuro = BLACK. a CROW is black — kuro.",
+ "しろ":"shiro = WHITE. a white bed-SHEET — shiro.",
+ "あか":"aka = RED. 'AH!' a red cut — aka. (ao = blue).",
+ "あお":"ao = BLUE. 'AOW' cold blue water — ao. (aka = red).",
+ "きいろ":"kiiro = YELLOW. a golden KEY — ki-iro (two i's).",
+ "みどり":"midori = GREEN. Midori liqueur is bright green — midori.",
+ "きく":"kiku = LISTEN (casual / dictionary). ends -ku. polite = kikiMASU, neg = kiKAnai.",
+ "きかない":"kiKAnai = don't listen (casual). u-verb neg uses -A-: ku to ka to kanai.",
+ "ききません":"kikimaSEN = don't listen (polite). masu to masen. (NOT 'kiki shimasen' — kiku is a real verb!)",
+ "みません":"mimaSEN = don't watch. mimasu to mimasen.",
+ "おんがく":"ongaku = MUSIC. 'on' it goes, give it gas — on-ga-ku.",
+ "ききます":"ki-KI-masu = LISTEN (polite). Its OWN verb (kiku) — NOT kiki+shimasu! kiku to kikimasu to kikanai.",
+ "みます":"mi-masu = WATCH / look. miru-verb: miru to mimasu to minai to mimasen (just drop ru).",
+ "いえ":"ie = HOUSE. two vowels, 'ee' — your little i-e.",
+ "いきます":"iki-masu = GO. iku to ikimasu to ikanai. (ikimashita = went).",
+ "そして":"soshite = 'and SO...' — joins SENTENCES. (to joins nouns.)",
+ "と":"to = AND between nouns: A to B. (soshite joins sentences.)",
+ "いちばん":"ichi(one) + ban = NUMBER ONE = your favourite.",
+ "きょう":"today = KYO + u, one beat 'kyo' (small ょ) — NOT ki-yo-i. kinou is yesterday.",
+ "きのう":"yesterday = ki-no-u (KEY-know). kiNOU has the N; kyou (today) does not.",
+ "あなた":"you = a-na-ta. WARNING: atashi / watashi means I (yourself) — anata is the OTHER person!",
+ "きた":"a KITE blows away NORTH",
+ "みなみ":"MIAMI is down SOUTH",
+ "にし":"sunSET — the last NIce SHIne is WEST (higashi = sunrise side)",
+ "ひがし":"sun RISES east on HIGH GAS (nishi = sunset side)",
+ "うえ":"U.E. = Up Escalator",
+ "した":"a SHEET lies DOWN on the floor",
+ "はる":"HAREs hop in SPRING",
+ "なつ":"summer is NUTS — na-TSU has the TS of nuts",
+ "あき":"leaves turn khAKI in FALL",
+ "つゆ":"the rainy season CHEWS-YU up",
+ "ふゆ":"FEW leaves left in WINTER",
+ "あめ":"'Ah, meh.' — your face when it RAINS",
+ "くもり":"MORE CUmulus → ku-mori (your hint!)",
+ "はれ":"hare = SUNNY / clear. ha-RE, hooray, blue sky!",
+ "かぜがつよい":"KAZE(wind) ga TSUYOI(strong) — don't drop the TSU: tsu-yo-i",
+ "はな":"you smell FLOWERS with your NOSE — hana is both",
+ "かみ":"'COMB ME!' says your HAIR",
+ "あたま":"a TAM (hat) sits on your HEAD — a-TAM-a",
+ "くち":"coochie-COO starts at the MOUTH — kuchi",
+ "みじかい":"a MIDGE fly is SHORT — miji-kai",
+ "みじかくない":"mijikai − い + くない = NOT short",
+ "ちいさい":"teeny CHEEse cube = SMALL size (hikui = LOW height, mijikai = SHORT length)",
+ "ひくい":"a HICcup makes you duck LOW — hiku-i",
+ "ひくくない":"hikui → hikuKUNAI = NOT low (く before ない)",
+ "たかい":"TAKE-off climbs HIGH — taka-i",
+ "たかくない":"takai − い + くない = NOT high",
+ "おもたい":"'Oh! MO' TIE-downs!' — HEAVY kit",
+ "おもたくない":"omotai − い + くない = NOT heavy",
+ "かるい":"easy to CARry — KARui = light",
+ "かるくない":"karui − い + くない = NOT light",
+ "ながい":"a NAGging story is LONG — naga-i",
+ "ながくない":"nagai − い + くない = NOT long",
+ "おおきい":"OOH! KEY so BIG — oo-kii",
+ "おおきくない":"ookii − い + くない = NOT big",
+ "ちいさくない":"chiisai − い + くない = NOT small",
+ "せがたかい":"SE(height) ga TAKAI(high) = TALL person",
+ "せがひくい":"SE(height) ga HIKUI(low) = SHORT person",
+ "そうじする":"souji + suru = CLEAN. It is a suru-VERB.",
+ "そうじしない":"souji + SHINAI. suru-verbs negate with shinai — never -kunai (that is only for adjectives!).",
+ "せんたくする":"SENTAKU = SOCKS to the wash (SOUJI is the soap one!)",
+ "せんたくしない":"sentaku + SHINAI = laundry not done. suru to shinai (not -masen, not -kunai).",
+ "いきました":"MASHED the throttle and WENT — iki-mashita",
+ "どう":"how? = DOU. The trio: dou = plain HOW, naze = WHY (reason), doushite = WHY / how-come.",
+ "どうして":"DOU(how) + shite = 'HOW come?'",
+ "なぜ":"NAZE = pure WHY (asking the reason)",
+ "なんようび":"NAN(what) + YOUBI(weekday)",
+ "なんじ":"NAN(what) + JI(hour)",
+ "なんぷん":"NAN(what) + PUN(minute)",
+ "なんがつ":"NAN(what) + GATSU(month)",
+ "まいにち":"MAI(every) + NICHI(day) — same nichi as nichiYOUBI",
+ "おなじ":"'oh-NAH-gee, SAME again!'",
+ "はし":"two chopsticks lean together into a BRIDGE — hashi",
+ "はこ":"a TACO ships in a HAKO — BOX (it rhymes)",
+ "さい":"birthday SIGH = years old (じ ji counts o'clock, さい counts age)",
+ "もくようび":"Thursday = MOKU(moku=wood)youbi. 4th day.",
+ "スパイダー":"say 'spider' with vowels everywhere: SU-PA-I-DA-A",
+ "パイロット":"PIE + ROTTO — pa-i-rot-to (double t)",
+ "ラーメン":"raaaamen — stretch the aa, no u",
+ "サラダ":"salad goes 'sara-DA!' — ends in da",
+ "わたしたち":"watashi + TACHI ('and company') = WE",
+ "あなたたち":"anata + TACHI ('and company') = YOU lot",
+ "かれら":"kare + RA (group) = THEY (men)",
+ "かのじょら":"kanojo + RA (group) = THEY (women)",
+ "わたしの":"watashi + NO ('s) = MY",
+ "あなたの":"anata + NO ('s) = YOUR",
+ "かれの":"kare + NO ('s) = HIS",
+ "かのじょの":"kanojo + NO (s) = HER / hers (her book). の makes it possessive.",
+ "わたしたちの":"WE (watashitachi) + NO ('s) = OUR",
+ "あなたたちの":"YOU-lot (anatatachi) + NO ('s) = YOUR (plural)",
+ "かれらの":"THEY-men (karera) + NO ('s) = THEIR",
+ "かのじょらの":"THEY-women (kanojoRA) + NO ('s) = THEIR",
+ "せ":"just SE = height — the が in se-ga-takai is glue, not the word",
+ "おにいさん":"お…さん wrapper = OLDER — big brother gets the respect suffix",
+ "おねえさん":"お…さん wrapper = OLDER — big sister, 'o-NEE-san'",
+ "おとうと":"bare word = YOUNGER brother — juniors get no お…さん",
+ "いもうと":"IMO(potato)-loving little sister — bare word, no さん for juniors",
+ "こんにちわ":"KON+NICHI(day)+WA — same nichi as maiNICHI, so the ん gets its own beat",
+ "こんばんわ":"KON+BAN(evening)+WA — ban is yoru's other name",
+ "おおもり":"'ooh, MORE?' — yes please: a LARGE serving (your hint!)",
+ "ともだち":"TOM the DACHshund is your FRIEND — tomo-dachi",
+ "べんきょう":"BEN K. yells YO! mid-STUDY — benkyou",
+ "うんどう":"exercise UN-DOes the dough — undou",
+ "たいせつ":"your IMPORTANT TIE-SETSu — precious tie collection",
+ "たいせつな":"taisetsu + NA = the glue before a noun (like kono+noun)",
+ "でんしゃ":"den-SHA — the train goes SHAaa (not -shou!)",
+ "はやい":"HI-YAH! karate-chop FAST — haya-i",
+ "おそい":"OH SO slOw — o-so-i",
+ "します":"SHIMASU = DO in its polite work suit (suru dressed up)",
+ "しごと":"SHE'S GOT TO go to WORK — shi-goto",
+ 
+ 
+ "からだ":"KARAte uses the whole BODY — kara-da",
+ "むね":"your treasure CHEST holds your MUNE-y — mune",
+ "せなか":"SE + NAKA(middle) — the middle of your BACK",
+ "こし":"'oh GOSH-i, my WAIST' — koshi",
+ "て":"a cup of TEa in your HAND — te",
+ "あし":"ASHy LEGs — ashi (legs AND feet)"
+};
+let HINTS={};
+try{ HINTS=JSON.parse(localStorage.getItem('jq_hints_v1'))||{}; }catch(e){ HINTS={}; }
+function saveHints(){ try{ localStorage.setItem('jq_hints_v1', JSON.stringify(HINTS)); }catch(e){} }
+function hintFor(it){ const u=HINTS[it.k]; return (u!==undefined&&u!=='') ? u : (DEFAULT_HINTS[it.k]||''); }
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function saveHintFromEditor(){
+  const q=queue[pos]; const el=document.getElementById('hintEdit'); if(!el) return;
+  const v=(el.value||'').trim();
+  if(v && v!==(DEFAULT_HINTS[q.it.k]||'')) HINTS[q.it.k]=v;
+  else if(!v) delete HINTS[q.it.k];
+  saveHints();
+  const b=document.getElementById('hintSave');
+  if(b){ b.textContent='Saved ✓'; setTimeout(()=>{ const x=document.getElementById('hintSave'); if(x) x.textContent='Save hint'; },1500); }
+}
+function batchOn(b){ return batchSel[b]!==false; }
+function renderBatches(){
+  const box=$('batches'); if(!box) return; box.innerHTML='';
+  BATCHES.forEach(bt=>{
+    const n=DATA.filter(it=>it.b===bt.id && (!wordsOnly||!it.p)).length;
+    const on=batchSel[bt.id]!==false;
+    const row=document.createElement('div');
+    row.className='topic'+(on?' sel':'')+(n===0?' empty':'');
+    row.innerHTML='<span class="mark">'+(on?'\u2713':'')+'</span>'+
+      '<span><span class="tn">'+bt.label+'</span><br><span class="tj">added '+bt.date+'</span></span>'+
+      '<span class="tc">'+n+'</span>';
+    row.addEventListener('click',()=>{
+      const sel=!(batchSel[bt.id]!==false);
+      batchSel[bt.id]=sel;
+      row.classList.toggle('sel',sel);
+      row.querySelector('.mark').textContent=sel?'\u2713':'';
+      renderTopics(); updatePool();
+    });
+    box.appendChild(row);
+  });
+}
+function renderTopics(){
+  const box=$('topics'); box.innerHTML='';
+  TOPICS.forEach(t=>{
+    const n=ITEMS_BY_TOPIC[t.id].filter(it=>(!wordsOnly||!it.p)&&batchOn(it.b)).length;
+    const on=checks[t.id]!==false;
+    const row=document.createElement('div');
+    row.className='topic'+(on?' sel':'')+(n===0?' empty':'');
+    row.innerHTML='<span class="mark">'+(on?'\u2713':'')+'</span>'+
+      '<span><span class="tn">'+t.en+'</span><br><span class="tj jp">'+t.jp+'</span></span>'+
+      '<span class="tc">'+n+'</span>';
+    row.addEventListener('click',()=>{
+      const sel=!(checks[t.id]!==false);
+      checks[t.id]=sel;
+      row.classList.toggle('sel',sel);
+      row.querySelector('.mark').textContent=sel?'\u2713':'';
+      updatePool();
+    });
+    box.appendChild(row);
+  });
+}
+function selectedTopics(){return TOPICS.filter(t=>checks[t.id]!==false).map(t=>t.id);}
+function curDir(){return document.querySelector('input[name=dir]:checked').value;}
+function basePoolCount(){
+  let n=0; selectedTopics().forEach(id=>n+=ITEMS_BY_TOPIC[id].filter(it=>(!wordsOnly||!it.p)&&batchOn(it.b)).length);
+  return n;
+}
+function updatePool(){
+  const items=basePoolCount();
+  const mult=curDir()==='both'?2:1;
+  const total=items*mult;
+  $('poolInfo').textContent = items+' words selected · '+total+' questions available';
+  $('start').disabled = items===0;
+  let kc=0; selectedTopics().forEach(id=>kc+=ITEMS_BY_TOPIC[id].filter(it=>it.kj && batchOn(it.b)).length);
+  const ki=$('kanjiInfo'); if(ki) ki.textContent=kc+' kanji available — see it, type reading + meaning';
+  const ks=$('startKanji'); if(ks) ks.disabled=kc===0;
+}
+$('selAll').onclick=()=>{TOPICS.forEach(t=>checks[t.id]=true);renderTopics();updatePool();};
+$('selNone').onclick=()=>{TOPICS.forEach(t=>checks[t.id]=false);renderTopics();updatePool();};
+document.querySelectorAll('#dirSeg label').forEach(l=>{
+  l.addEventListener('click',()=>{
+    document.querySelectorAll('#dirSeg label').forEach(x=>x.classList.remove('on'));
+    l.classList.add('on'); l.querySelector('input').checked=true; updatePool();
+  });
+});
+
+/* ---------- quiz state ---------- */
+let queue=[], pos=0, score=0, answered=false, roundInfo={};
+
+function buildQueue(pool, dir, limit){
+  let q=[];
+  pool.forEach(it=>{
+    if(dir==='both'){ q.push({it,mode:'j2e'}); q.push({it,mode:'e2j'}); }
+    else if(dir==='j2e'){ q.push({it,mode:'j2e'}); }
+    else { q.push({it,mode:'e2j'}); }
+  });
+  if(smartMode){
+    q.forEach(e=>{ e._w=weightFor(e.it,e.mode); e._k=Math.pow(Math.random(),1/e._w); });
+    q.sort((a,b)=>b._k-a._k);
+  } else {
+    shuffle(q);
+  }
+  if(limit>0 && q.length>limit) q=q.slice(0,limit);
+  q.forEach(e=>{ e.st='p'; e.given=''; e.score=0; e.auto=0; e.hintUsed=false; });
+  return q;
+}
+function startQuiz(pool,dir,limit){
+  queue=buildQueue(pool,dir,limit);
+  pos=0; score=0; roundInfo={words:wordsOnly, smart:smartMode};
+  $('menu').classList.add('hidden'); $('results').classList.add('hidden');
+  $('quiz').classList.remove('hidden');
+  showQuestion();
+}
+$('start').onclick=()=>{
+  const pool=[]; selectedTopics().forEach(id=>pool.push(...ITEMS_BY_TOPIC[id].filter(it=>(!wordsOnly||!it.p)&&batchOn(it.b))));
+  if(!pool.length) return;
+  startQuiz(pool, curDir(), parseInt($('length').value,10));
+};
+
+function answeredCount(){ return queue.reduce((n,e)=>n+(e.st==='a'?1:0),0); }
+function nextPending(from){
+  const N=queue.length;
+  for(let k=1;k<=N;k++){ const i=(from+k)%N; if(queue[i].st==='p') return i; }
+  return -1;
+}
+function fmt(x){return (Math.round(x*10)/10).toString();}
+
+function showQuestion(){
+  const q=queue[pos];
+  answered = q.st==='a';
+  const done=answeredCount();
+  $('qcount').textContent='Question '+(pos+1)+' of '+queue.length+'  ·  '+done+' answered';
+  $('qscore').textContent=fmt(score);
+  $('qbar').style.width=(done/queue.length*100)+'%';
+  const _dir=q.mode==='j2e'?'Japanese → English':'English → Japanese';
+  $('qtopic').textContent = showHint ? (_dir+'  ·  '+TOPIC_BY_ID[q.it.t].en) : _dir;
+  const promptEl=$('qprompt');
+  if(q.mode==='j2e'){
+    $('qask').textContent='What does this mean?  (type the English)';
+    promptEl.className='prompt kana jp'+(q.it.k.length>7?' long':'');
+    promptEl.textContent=q.it.k;
+    $('qinput').placeholder='meaning in English';
+  }else{
+    $('qask').textContent='How do you say this?  (type the romaji)';
+    promptEl.className='prompt en';
+    promptEl.textContent=q.it.e;
+    $('qinput').placeholder='type romaji';
+  }
+  const inp=$('qinput');
+  $('qfeedback').innerHTML='';
+  if(answered){
+    inp.value = q.given==='(shown)'?'':q.given;
+    inp.disabled=true;
+    renderFeedback();
+    $('qsubmit').classList.add('hidden');
+    $('qshow').classList.add('hidden');
+    $('qnext').classList.remove('hidden');
+    $('qnext').focus();
+  }else{
+    inp.value=''; inp.disabled=false; inp.focus();
+    $('qsubmit').classList.remove('hidden');
+    $('qshow').classList.remove('hidden');
+    $('qnext').classList.add('hidden');
+  }
+  $('qhintText').textContent=''; $('qhintText').classList.add('hidden');
+  $('qhint').classList.toggle('hidden', answered || !hintFor(q.it));
+  $('qback').disabled = pos===0;
+}
+
+function doCheck(forceZero){
+  const q=queue[pos];
+  if(q.st==='a') return;
+  const val=$('qinput').value;
+  let s;
+  if(forceZero){ s=0; }
+  else if(q.mode==='j2e'){ s=gradeEn(val, q.it.a); }
+  else { s=gradeRomaji(val, q.it.r); }
+  if(q.hintUsed && s>0.5) s=0.5;
+  q.st='a'; q.given= forceZero?'(shown)':val; q.score=s; q.auto=s;
+  recordAnswer(q);
+  score+=s; answered=true;
+  $('qscore').textContent=fmt(score);
+  $('qbar').style.width=(answeredCount()/queue.length*100)+'%';
+  $('qcount').textContent='Question '+(pos+1)+' of '+queue.length+'  ·  '+answeredCount()+' answered';
+  $('qinput').disabled=true;
+  $('qsubmit').classList.add('hidden');
+  $('qshow').classList.add('hidden');
+  $('qnext').classList.remove('hidden');
+  renderFeedback();
+  $('qnext').focus();
+}
+function setMark(s){
+  const q=queue[pos];
+  if(q.st!=='a') return;
+  if(q.hintUsed && s>0.5) s=0.5;
+  score += (s - q.score); q.score=s;
+  recordAnswer(q);
+  $('qscore').textContent=fmt(score);
+  renderFeedback();
+  $('qnext').focus();
+}
+function renderFeedback(){
+  const q=queue[pos];
+  const cs=q.score;
+  const cls=cs===1?'good':cs===0.5?'half':'bad';
+  const word=cs===1?'Correct!':cs===0.5?'Half credit':'Not quite';
+  const icon=cs===1?'✓':cs===0.5?'◐':'✗';
+  const romaji=q.it.r[0];
+  const fb=$('qfeedback');
+  fb.innerHTML=
+    '<div class="fb '+cls+'">'+
+      '<div class="verdict">'+icon+' '+word+' &nbsp;<span style="font-weight:500;color:var(--muted)">+'+fmt(cs)+'</span>'+(q.hintUsed?' &nbsp;<span style="color:var(--half);font-size:12px;font-weight:600">💡 hint used · ½ max</span>':'')+'</div>'+
+      '<div class="detail"><span class="ja jp">'+q.it.k+'</span> &nbsp; <b>'+romaji+'</b> &nbsp; = &nbsp; '+q.it.e+'</div>'+
+      '<div class="adjust"><span class="lbl">Override:</span>'+
+        '<button class="mk full'+(cs===1?' on':'')+'" data-s="1"'+(q.hintUsed?' disabled style="opacity:.4;cursor:not-allowed"':'')+'>✓ Full</button>'+
+        '<button class="mk half'+(cs===0.5?' on':'')+'" data-s="0.5">◐ Half</button>'+
+        '<button class="mk zero'+(cs===0?' on':'')+'" data-s="0">✗ Wrong</button>'+
+      '</div>'+
+      '<div class="hintrow"><input class="hint-in" id="hintEdit" placeholder="write a memory hint for this word…" value="'+escAttr(hintFor(q.it))+'">'+
+      '<button class="mk" id="hintSave">Save hint</button></div>'+
+    '</div>';
+  fb.querySelectorAll('.adjust .mk').forEach(b=>b.onclick=()=>setMark(parseFloat(b.dataset.s)));
+  fb.querySelector('#hintSave').onclick=saveHintFromEditor;
+  fb.querySelector('#hintEdit').addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); ev.stopPropagation(); saveHintFromEditor(); ev.target.blur(); } });
+}
+function advance(){
+  const ni=nextPending(pos);
+  if(ni===-1){ showResults(); return; }
+  pos=ni; showQuestion();
+}
+function goBack(){ if(pos>0){ pos--; showQuestion(); } }
+function goFwd(){
+  if(pos<queue.length-1){ pos++; showQuestion(); }
+  else { advance(); }
+}
+$('qhint').onclick=()=>{ const q=queue[pos]; const hv=hintFor(q.it);
+  if(hv){ q.hintUsed=true; $('qhintText').textContent='💡 '+hv; $('qhintText').classList.remove('hidden'); $('qinput').focus(); } };
+$('qsubmit').onclick=()=>doCheck(false);
+$('qshow').onclick=()=>doCheck(true);
+$('qnext').onclick=advance;
+$('qback').onclick=goBack;
+$('qfwd').onclick=goFwd;
+$('qquit').onclick=()=>{ if(answeredCount()) showResults(); else backToMenu(); };
+document.addEventListener('keydown',e=>{
+  if($('quiz').classList.contains('hidden')) return;
+  if(e.key==='Enter'){ if(e.target&&e.target.id==='hintEdit') return; e.preventDefault(); if(!answered){ doCheck(false); } else { advance(); } return; }
+  const inp=$('qinput');
+  const typing = document.activeElement===inp && !inp.disabled;
+  if(e.key==='ArrowLeft' && !typing){ e.preventDefault(); goBack(); }
+  if(e.key==='ArrowRight' && !typing){ e.preventDefault(); goFwd(); }
+});
+
+/* ---------- results ---------- */
+function showResults(){
+  $('quiz').classList.add('hidden'); $('results').classList.remove('hidden');
+  const done=queue.filter(e=>e.st==='a');
+  const n=done.length;
+  const pct = n? Math.round(score/n*100) : 0;
+  $('rScore').textContent=fmt(score)+' / '+n;
+  $('rSub').textContent=pct+'%  ·  '+done.filter(e=>e.score===1).length+' correct, '+
+     done.filter(e=>e.score===0.5).length+' half, '+done.filter(e=>e.score===0).length+' missed';
+  $('rBar').style.width=pct+'%';
+  $('rEmoji').textContent = pct>=90?'🎉':pct>=70?'😃':pct>=50?'🙂':'💪';
+  const tb=$('rTable'); tb.innerHTML='';
+  done.forEach((e,i)=>{
+    const cls=e.score===1?'full':e.score===0.5?'half':'zero';
+    const shown = e.mode==='j2e' ? '<span class="jp">'+e.it.k+'</span>' : e.it.e;
+    const answer = e.mode==='j2e'
+        ? e.it.e+' <span style="color:var(--muted)">('+e.it.r[0]+')</span>'
+        : e.it.r[0]+' <span class="jp" style="color:var(--muted)">'+e.it.k+'</span>';
+    const giv = e.given && e.given!=='(shown)' ? e.given : '<span style="color:var(--muted)">—</span>';
+    const gcls = e.score===1?'ok':e.score===0?'miss':'';
+    const tr=document.createElement('tr'); tr.className=cls;
+    tr.innerHTML='<td>'+(i+1)+'</td><td>'+shown+'</td><td class="'+gcls+'">'+giv+
+      '</td><td>'+answer+'</td><td>'+fmt(e.score)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+function backToMenu(){
+  ['results','quiz','kquiz','kresults','cquiz','cresults'].forEach(id=>{const e=$(id);if(e)e.classList.add('hidden');});
+  $('menu').classList.remove('hidden'); updatePool();
+}
+$('rMenu').onclick=backToMenu;
+$('rAgain').onclick=()=>{
+  const pool=[...new Set(queue.map(q=>q.it))];
+  startQuiz(pool, curDir(), 0);
+};
+$('rWrong').onclick=()=>{
+  const missed=[...new Set(queue.filter(e=>e.st==='a'&&e.score<1).map(e=>e.it))];
+  if(!missed.length){ alert('Nothing missed — perfect round!'); return; }
+  startQuiz(missed, curDir(), 0);
+};
+
+function buildResultsText(){
+  const done=queue.filter(e=>e.st==='a');
+  const n=done.length, pct=n?Math.round(score/n*100):0;
+  const miss=done.filter(e=>e.score===0), half=done.filter(e=>e.score===0.5);
+  const line=e=>'- '+e.it.k+' ('+e.it.r[0]+') = '+e.it.e+
+      (e.given&&e.given!=='(shown)'?' — I typed “'+e.given+'”':' — I used Show answer')+
+      (e.mode==='j2e'?'  [JP→EN]':'  [EN→JP]');
+  let t='My Japanese quiz results — '+new Date().toLocaleString()+'\n';
+  t+='Score: '+fmt(score)+' / '+n+' ('+pct+'%)\n';
+  const ms=new Set(queue.map(e=>e.mode));
+  const dirTxt = ms.size>1 ? 'Both ways' : (ms.has('j2e') ? 'Japanese → English' : 'English → Japanese');
+  t+='Setup: '+dirTxt+' · Words only: '+(roundInfo.words?'on':'off')+' · Smart review: '+(roundInfo.smart?'on':'off')+'\n';
+  if(queue.length!==n) t+='Round: '+queue.length+' questions, '+n+' answered\n';
+  const tIds=[...new Set(queue.map(e=>e.it.t))];
+  t+='Topics ('+tIds.length+'): '+tIds.map(id=>TOPIC_BY_ID[id].en).join(', ')+'\n';
+  const bIds=[...new Set(queue.map(e=>e.it.b))];
+  if(bIds.length<BATCHES.length) t+='Added-date filter: '+BATCHES.filter(b=>bIds.includes(b.id)).map(b=>b.label).join(', ')+'\n';
+  if(miss.length) t+='\nMissed ('+miss.length+'):\n'+miss.map(line).join('\n')+'\n';
+  if(half.length) t+='\nHalf credit ('+half.length+'):\n'+half.map(line).join('\n')+'\n';
+  if(!miss.length&&!half.length) t+='\nNothing missed — perfect round!\n';
+  t+='\nClaude, these are the ones I need help remembering.';
+  return t;
+}
+$('rSend').onclick=async ()=>{
+  const b=$('rSend'); const txt=buildResultsText();
+  let ok=false;
+  if(window.cowork && window.cowork.callMcpTool){
+    try{ const r=await window.cowork.callMcpTool('mcp__cowork__send_user_message',{message:txt}); ok=!(r&&r.isError); }
+    catch(err){ ok=false; }
+  }
+  if(ok){ b.textContent='Sent to the chat ✓'; }
+  else{
+    try{ await navigator.clipboard.writeText(txt); b.textContent='Copied — paste it to Claude ✓'; }
+    catch(err){
+      const ta=document.createElement('textarea'); ta.value=txt;
+      ta.style.cssText='width:100%;height:170px;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit';
+      b.closest('.card').appendChild(ta); ta.select();
+      b.textContent='Copy the text below';
+    }
+  }
+  setTimeout(()=>{ b.textContent='Send results to Claude'; }, 4000);
+};
+
+/* ============ KANJI QUIZ ============ */
+let kqueue=[], kpos=0, kscore=0, kanswered=false, kroundInfo={};
+function kfmt(x){ return (Math.round(x*100)/100).toString(); }
+function kanjiPool(){
+  const pool=[];
+  selectedTopics().forEach(id=>pool.push(...ITEMS_BY_TOPIC[id].filter(it=>it.kj && batchOn(it.b))));
+  return pool;
+}
+function buildKQueue(pool, limit){
+  let q=pool.map(it=>({it, mode:'kanji'}));
+  if(smartMode){
+    q.forEach(e=>{ e._w=weightFor(e.it,'kanji'); e._k=Math.pow(Math.random(),1/e._w); });
+    q.sort((a,b)=>b._k-a._k);
+  } else shuffle(q);
+  if(limit>0 && q.length>limit) q=q.slice(0,limit);
+  q.forEach(e=>{ e.st='p'; e.gr=''; e.gm=''; e.score=0; e.rs=0; e.ms=0; e.hintUsed=false; });
+  return q;
+}
+function startKanji(pool,limit){
+  if(!pool.length) return;
+  kqueue=buildKQueue(pool,limit);
+  kpos=0; kscore=0; kroundInfo={smart:smartMode};
+  ['menu','quiz','results','kresults'].forEach(id=>$(id).classList.add('hidden'));
+  $('kquiz').classList.remove('hidden');
+  showKQuestion();
+}
+$('startKanji').onclick=()=>startKanji(kanjiPool(), parseInt($('length').value,10));
+function kAnsweredCount(){ return kqueue.reduce((n,e)=>n+(e.st==='a'?1:0),0); }
+function kNextPending(from){ const N=kqueue.length; for(let k=1;k<=N;k++){ const i=(from+k)%N; if(kqueue[i].st==='p') return i; } return -1; }
+function showKQuestion(){
+  const q=kqueue[kpos];
+  kanswered = q.st==='a';
+  const done=kAnsweredCount();
+  $('kqcount').textContent='Kanji '+(kpos+1)+' of '+kqueue.length+'  ·  '+done+' answered';
+  $('kqscore').textContent=kfmt(kscore);
+  $('kqbar').style.width=(done/kqueue.length*100)+'%';
+  $('kqtopic').textContent = showHint ? ('漢字  ·  '+TOPIC_BY_ID[q.it.t].en) : '漢字 recognition';
+  const p=$('kqprompt'); p.className='prompt kana jp'+(q.it.kj.length>5?' long':''); p.textContent=q.it.kj;
+  const r=$('kqRead'), mn=$('kqMean');
+  $('kqfeedback').innerHTML='';
+  if(kanswered){
+    r.value=q.gr==='(shown)'?'':q.gr; mn.value=q.gm==='(shown)'?'':q.gm;
+    r.disabled=true; mn.disabled=true;
+    renderKFeedback();
+    $('kqsubmit').classList.add('hidden'); $('kqshow').classList.add('hidden'); $('kqnext').classList.remove('hidden'); $('kqnext').focus();
+  } else {
+    r.value=''; mn.value=''; r.disabled=false; mn.disabled=false; r.focus();
+    $('kqsubmit').classList.remove('hidden'); $('kqshow').classList.remove('hidden'); $('kqnext').classList.add('hidden');
+  }
+  $('kqhintText').textContent=''; $('kqhintText').classList.add('hidden');
+  $('kqhint').classList.toggle('hidden', kanswered || !hintFor(q.it));
+  $('kqback').disabled = kpos===0;
+}
+function kCheck(forceZero){
+  const q=kqueue[kpos];
+  if(q.st==='a') return;
+  const rv=$('kqRead').value, mv=$('kqMean').value;
+  let rs, ms;
+  if(forceZero){ rs=0; ms=0; }
+  else { rs=gradeRomaji(rv,q.it.r); ms=gradeEn(mv,q.it.a); }
+  q.rs=rs; q.ms=ms;
+  let s=(rs+ms)/2;
+  if(q.hintUsed && s>0.5) s=0.5;
+  q.st='a'; q.gr=forceZero?'(shown)':rv; q.gm=forceZero?'(shown)':mv; q.score=s;
+  recordAnswer(q);
+  kscore+=s; kanswered=true;
+  $('kqscore').textContent=kfmt(kscore);
+  $('kqbar').style.width=(kAnsweredCount()/kqueue.length*100)+'%';
+  $('kqcount').textContent='Kanji '+(kpos+1)+' of '+kqueue.length+'  ·  '+kAnsweredCount()+' answered';
+  $('kqRead').disabled=true; $('kqMean').disabled=true;
+  $('kqsubmit').classList.add('hidden'); $('kqshow').classList.add('hidden'); $('kqnext').classList.remove('hidden');
+  renderKFeedback(); $('kqnext').focus();
+}
+function kSetMark(s){
+  const q=kqueue[kpos]; if(q.st!=='a') return;
+  if(q.hintUsed && s>0.5) s=0.5;
+  kscore += (s-q.score); q.score=s; recordAnswer(q);
+  $('kqscore').textContent=kfmt(kscore); renderKFeedback(); $('kqnext').focus();
+}
+function kpchip(label,sc){ const c=sc===1?'ok':sc===0.5?'hf':'no'; const ic=sc===1?'✓':sc===0.5?'◐':'✗'; return '<span class="pchip '+c+'">'+ic+' '+label+'</span>'; }
+function renderKFeedback(){
+  const q=kqueue[kpos]; const cs=q.score;
+  const cls=cs===1?'good':cs>0?'half':'bad';
+  const word=cs===1?'Perfect!':cs>0?'Partial':'Not quite';
+  const icon=cs===1?'✓':cs>0?'◐':'✗';
+  const fb=$('kqfeedback');
+  fb.innerHTML='<div class="fb '+cls+'">'+
+    '<div class="verdict">'+icon+' '+word+' &nbsp;<span style="font-weight:500;color:var(--muted)">+'+kfmt(cs)+'</span>'+(q.hintUsed?' &nbsp;<span style="color:var(--half);font-size:12px;font-weight:600">💡 hint used · ½ max</span>':'')+'</div>'+
+    '<div class="parts">'+kpchip('reading',q.rs)+kpchip('meaning',q.ms)+'</div>'+
+    '<div class="detail"><span class="ja jp">'+q.it.kj+'</span> &nbsp; <b>'+q.it.r[0]+'</b> &nbsp; = &nbsp; '+q.it.e+' &nbsp;<span style="color:var(--muted)">('+q.it.k+')</span></div>'+
+    '<div class="adjust"><span class="lbl">Override:</span>'+
+      '<button class="mk full'+(cs===1?' on':'')+'" data-s="1"'+(q.hintUsed?' disabled style="opacity:.4;cursor:not-allowed"':'')+'>✓ Full</button>'+
+      '<button class="mk half'+(cs===0.5?' on':'')+'" data-s="0.5">◐ Half</button>'+
+      '<button class="mk zero'+(cs===0?' on':'')+'" data-s="0">✗ Wrong</button>'+
+    '</div>'+
+    '<div class="hintrow"><input class="hint-in" id="khintEdit" placeholder="write a memory hint for this kanji…" value="'+escAttr(hintFor(q.it))+'">'+
+    '<button class="mk" id="khintSave">Save hint</button></div>'+
+  '</div>';
+  fb.querySelectorAll('.adjust .mk').forEach(b=>b.onclick=()=>kSetMark(parseFloat(b.dataset.s)));
+  fb.querySelector('#khintSave').onclick=ksaveKHint;
+  fb.querySelector('#khintEdit').addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); ev.stopPropagation(); ksaveKHint(); ev.target.blur(); } });
+}
+function ksaveKHint(){
+  const q=kqueue[kpos]; const el=document.getElementById('khintEdit'); if(!el) return;
+  const v=(el.value||'').trim();
+  if(v && v!==(DEFAULT_HINTS[q.it.k]||'')) HINTS[q.it.k]=v; else if(!v) delete HINTS[q.it.k];
+  saveHints();
+  const b=document.getElementById('khintSave'); if(b){ b.textContent='Saved ✓'; setTimeout(()=>{const x=document.getElementById('khintSave'); if(x) x.textContent='Save hint';},1500); }
+}
+function kAdvance(){ const ni=kNextPending(kpos); if(ni===-1){ showKResults(); return; } kpos=ni; showKQuestion(); }
+function kGoBack(){ if(kpos>0){ kpos--; showKQuestion(); } }
+function kGoFwd(){ if(kpos<kqueue.length-1){ kpos++; showKQuestion(); } else { kAdvance(); } }
+$('kqhint').onclick=()=>{ const q=kqueue[kpos]; const hv=hintFor(q.it); if(hv){ q.hintUsed=true; $('kqhintText').textContent='💡 '+hv; $('kqhintText').classList.remove('hidden'); $('kqRead').focus(); } };
+$('kqsubmit').onclick=()=>kCheck(false);
+$('kqshow').onclick=()=>kCheck(true);
+$('kqnext').onclick=kAdvance;
+$('kqback').onclick=kGoBack;
+$('kqfwd').onclick=kGoFwd;
+$('kqquit').onclick=()=>{ if(kAnsweredCount()) showKResults(); else backToMenu(); };
+$('kqHintToggle').addEventListener('click',()=>{ showHint=!showHint; const e=$('kqHintToggle'); e.classList.toggle('on',showHint); e.querySelector('.hbox').textContent=showHint?'✓':''; const q=kqueue[kpos]; if(q){ $('kqtopic').textContent = showHint ? ('漢字  ·  '+TOPIC_BY_ID[q.it.t].en) : '漢字 recognition'; } });
+document.addEventListener('keydown',e=>{
+  if($('kquiz').classList.contains('hidden')) return;
+  if(e.key==='Enter'){
+    if(e.target&&e.target.id==='khintEdit') return;
+    e.preventDefault();
+    if(!kanswered){
+      if(e.target&&e.target.id==='kqRead' && !$('kqMean').value.trim()){ $('kqMean').focus(); return; }
+      kCheck(false);
+    } else { kAdvance(); }
+  }
+});
+function showKResults(){
+  $('kquiz').classList.add('hidden'); $('kresults').classList.remove('hidden');
+  const done=kqueue.filter(e=>e.st==='a'); const n=done.length; const pct=n?Math.round(kscore/n*100):0;
+  $('krScore').textContent=kfmt(kscore)+' / '+n;
+  $('krSub').textContent=pct+'%  ·  '+done.filter(e=>e.score===1).length+' full, '+done.filter(e=>e.score>0&&e.score<1).length+' partial, '+done.filter(e=>e.score===0).length+' missed';
+  $('krBar').style.width=pct+'%';
+  $('krEmoji').textContent= pct>=90?'🎉':pct>=70?'😃':pct>=50?'🙂':'💪';
+  const tb=$('krTable'); tb.innerHTML='';
+  done.forEach((e,i)=>{
+    const cls=e.score===1?'full':e.score>0?'half':'zero';
+    const yr=(e.gr&&e.gr!=='(shown)')?e.gr:'—'; const ym=(e.gm&&e.gm!=='(shown)')?e.gm:'—';
+    const yrc=e.rs===1?'ok':e.rs===0?'miss':''; const ymc=e.ms===1?'ok':e.ms===0?'miss':'';
+    const tr=document.createElement('tr'); tr.className=cls;
+    tr.innerHTML='<td>'+(i+1)+'</td>'+
+      '<td><span class="jp" style="font-size:21px">'+e.it.kj+'</span></td>'+
+      '<td><span class="'+yrc+'">'+yr+'</span> <span style="color:var(--muted)">·</span> <span class="'+ymc+'">'+ym+'</span></td>'+
+      '<td><b>'+e.it.r[0]+'</b> <span style="color:var(--muted)">·</span> '+e.it.e+'</td>'+
+      '<td>'+kfmt(e.score)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+$('krMenu').onclick=backToMenu;
+$('krAgain').onclick=()=>{ const pool=[...new Set(kqueue.map(e=>e.it))]; startKanji(pool,0); };
+$('krWrong').onclick=()=>{ const missed=[...new Set(kqueue.filter(e=>e.st==='a'&&e.score<1).map(e=>e.it))]; if(!missed.length){ alert('Nothing missed — perfect round!'); return; } startKanji(missed,0); };
+function buildKResultsText(){
+  const done=kqueue.filter(e=>e.st==='a'); const n=done.length, pct=n?Math.round(kscore/n*100):0;
+  const bad=done.filter(e=>e.score<1);
+  const mk=sc=>sc===1?'✓':sc===0.5?'◐':'✗';
+  const line=e=>'- '+e.it.kj+' = '+e.it.r[0]+' / '+e.it.e+'  (reading '+mk(e.rs)+', meaning '+mk(e.ms)+')';
+  let t='My Kanji recognition quiz — '+new Date().toLocaleString()+'\n';
+  t+='Score: '+kfmt(kscore)+' / '+n+' ('+pct+'%)  ·  '+n+' kanji\n';
+  const tIds=[...new Set(kqueue.map(e=>e.it.t))];
+  t+='Topics: '+tIds.map(id=>TOPIC_BY_ID[id].en).join(', ')+'\n';
+  if(bad.length) t+='\nNeed work ('+bad.length+'):\n'+bad.map(line).join('\n')+'\n';
+  else t+='\nPerfect round!\n';
+  t+='\nClaude, help me drill the kanji I missed.';
+  return t;
+}
+$('krSend').onclick=async ()=>{
+  const b=$('krSend'); const txt=buildKResultsText();
+  let ok=false;
+  if(window.cowork && window.cowork.callMcpTool){
+    try{ const r=await window.cowork.callMcpTool('mcp__cowork__send_user_message',{message:txt}); ok=!(r&&r.isError); }catch(err){ ok=false; }
+  }
+  if(ok){ b.textContent='Sent to the chat ✓'; }
+  else{
+    try{ await navigator.clipboard.writeText(txt); b.textContent='Copied — paste it to Claude ✓'; }
+    catch(err){
+      const ta=document.createElement('textarea'); ta.value=txt;
+      ta.style.cssText='width:100%;height:170px;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit';
+      b.closest('.card').appendChild(ta); ta.select(); b.textContent='Copy the text below';
+    }
+  }
+  setTimeout(()=>{ b.textContent='Send results to Claude'; }, 4000);
+};
+/* ============ END KANJI QUIZ ============ */
+
+
+
+const CV = [{"k": "たべる", "istem": "たべ", "te": "たべて", "nai": "たべ", "istem_r": "tabe", "te_r": "tabete", "nai_r": "tabe", "dict_r": "taberu", "eng": ["eat", "eats", "ate", "eating"], "pk": "を", "pr": "o", "objs": [["ラーメン", "raamen", "ramen"], ["サラダ", "sarada", "a salad"], ["あさごはん", "asagohan", "breakfast"]]}, {"k": "のむ", "istem": "のみ", "te": "のんで", "nai": "のま", "istem_r": "nomi", "te_r": "nonde", "nai_r": "noma", "dict_r": "nomu", "eng": ["drink", "drinks", "drank", "drinking"], "pk": "を", "pr": "o", "objs": [["ワイン", "wain", "wine"]]}, {"k": "つくる", "istem": "つくり", "te": "つくって", "nai": "つくら", "istem_r": "tsukuri", "te_r": "tsukutte", "nai_r": "tsukura", "dict_r": "tsukuru", "eng": ["make", "makes", "made", "making"], "pk": "を", "pr": "o", "objs": [["あさごはん", "asagohan", "breakfast"], ["サラダ", "sarada", "a salad"]]}, {"k": "みる", "istem": "み", "te": "みて", "nai": "み", "istem_r": "mi", "te_r": "mite", "nai_r": "mi", "dict_r": "miru", "eng": ["watch", "watches", "watched", "watching"], "pk": "を", "pr": "o", "objs": [["テレビ", "terebi", "TV"]]}, {"k": "きく", "istem": "きき", "te": "きいて", "nai": "きか", "istem_r": "kiki", "te_r": "kiite", "nai_r": "kika", "dict_r": "kiku", "eng": ["listen", "listens", "listened", "listening"], "pk": "を", "pr": "o", "objs": [["おんがく", "ongaku", "to music"]]}, {"k": "よむ", "istem": "よみ", "te": "よんで", "nai": "よま", "istem_r": "yomi", "te_r": "yonde", "nai_r": "yoma", "dict_r": "yomu", "eng": ["read", "reads", "read", "reading"], "pk": null, "pr": null, "objs": []}, {"k": "いく", "istem": "いき", "te": "いって", "nai": "いか", "istem_r": "iki", "te_r": "itte", "nai_r": "ika", "dict_r": "iku", "eng": ["go", "goes", "went", "going"], "pk": "に", "pr": "ni", "objs": [["にほん", "nihon", "to Japan"]]}, {"k": "おきる", "istem": "おき", "te": "おきて", "nai": "おき", "istem_r": "oki", "te_r": "okite", "nai_r": "oki", "dict_r": "okiru", "eng": ["get up", "gets up", "got up", "getting up"], "pk": null, "pr": null, "objs": []}, {"k": "ねる", "istem": "ね", "te": "ねて", "nai": "ね", "istem_r": "ne", "te_r": "nete", "nai_r": "ne", "dict_r": "neru", "eng": ["sleep", "sleeps", "slept", "sleeping"], "pk": null, "pr": null, "objs": []}, {"k": "きる", "istem": "き", "te": "きて", "nai": "き", "istem_r": "ki", "te_r": "kite", "nai_r": "ki", "dict_r": "kiru", "eng": ["wear", "wears", "wore", "wearing"], "pk": "を", "pr": "o", "objs": [["シャツ", "shatsu", "a shirt"]]}, {"k": "そうじする", "istem": "そうじし", "te": "そうじして", "nai": "そうじし", "istem_r": "soujishi", "te_r": "soujishite", "nai_r": "soujishi", "dict_r": "soujisuru", "eng": ["clean", "cleans", "cleaned", "cleaning"], "pk": "を", "pr": "o", "objs": [["へや", "heya", "the room"]]}, {"k": "せんたくする", "istem": "せんたくし", "te": "せんたくして", "nai": "せんたくし", "istem_r": "sentakushi", "te_r": "sentakushite", "nai_r": "sentakushi", "dict_r": "sentakusuru", "eng": ["do the laundry", "does the laundry", "did the laundry", "doing the laundry"], "pk": null, "pr": null, "objs": []}, {"k": "べんきょうする", "istem": "べんきょうし", "te": "べんきょうして", "nai": "べんきょうし", "istem_r": "benkyoushi", "te_r": "benkyoushite", "nai_r": "benkyoushi", "dict_r": "benkyousuru", "eng": ["study", "studies", "studied", "studying"], "pk": null, "pr": null, "objs": []}, {"k": "うんどうする", "istem": "うんどうし", "te": "うんどうして", "nai": "うんどうし", "istem_r": "undoushi", "te_r": "undoushite", "nai_r": "undoushi", "dict_r": "undousuru", "eng": ["exercise", "exercises", "exercised", "exercising"], "pk": null, "pr": null, "objs": []}];
+const CS = [["わたし", "watashi", "I", "1sg"], ["あなた", "anata", "You", "2sg"], ["かれ", "kare", "He", "3sg"], ["かのじょ", "kanojo", "She", "3sg"], ["かれら", "karera", "They", "pl"], ["わたしたち", "watashitachi", "We", "pl"], ["おとうさん", "otousan", "Dad", "3sg"], ["おかあさん", "okaasan", "Mum", "3sg"], ["おにいさん", "oniisan", "My older brother", "3sg"], ["おねえさん", "oneesan", "My older sister", "3sg"], ["ともだち", "tomodachi", "My friend", "3sg"], ["せんせい", "sensei", "The teacher", "3sg"]];
+const CT = {"present": [["まいにち", "mainichi", "every day"], ["こんしゅう", "konshuu", "this week"]], "future": [["あした", "ashita", "tomorrow"], ["らいしゅう", "raishuu", "next week"], ["きょう", "kyou", "today"]], "past": [["きのう", "kinou", "yesterday"], ["せんしゅう", "senshuu", "last week"], ["きょう", "kyou", "today"]], "progressive": [["いま", "ima", "now"]]};
+/* ============ CONJUGATION QUIZ (sentence builder) ============ */
+let cqueue=[], cpos=0, cscore=0, canswered=false;
+let conjChecks=CV.map(()=>true);
+function cforms(v){
+  const tek=v.te, ter=v.te_r;
+  const tak=tek.slice(0,-1)+(tek.slice(-1)==='て'?'た':'だ');
+  const tar=ter.slice(0,-2)+(ter.endsWith('te')?'ta':'da');
+  return {masu:[v.istem+'ます',v.istem_r+'masu'],masen:[v.istem+'ません',v.istem_r+'masen'],
+    mashita:[v.istem+'ました',v.istem_r+'mashita'],masendeshita:[v.istem+'ませんでした',v.istem_r+'masendeshita'],
+    teimasu:[v.te+'います',v.te_r+'imasu'],teimasen:[v.te+'いません',v.te_r+'imasen'],
+    dict:[v.k,v.dict_r],nai:[v.nai+'ない',v.nai_r+'nai'],ta:[tak,tar],nakatta:[v.nai+'なかった',v.nai_r+'nakatta'],
+    teiru:[v.te+'いる',v.te_r+'iru'],teinai:[v.te+'いない',v.te_r+'inai']};
+}
+function cfk(cat,pol,reg){
+  const np={'aff|polite':'masu','neg|polite':'masen','aff|plain':'dict','neg|plain':'nai'};
+  const pa={'aff|polite':'mashita','neg|polite':'masendeshita','aff|plain':'ta','neg|plain':'nakatta'};
+  const pr={'aff|polite':'teimasu','neg|polite':'teimasen','aff|plain':'teiru','neg|plain':'teinai'};
+  const key=pol+'|'+reg;
+  if(cat==='present'||cat==='future') return np[key];
+  if(cat==='past') return pa[key];
+  return pr[key];
+}
+function ceng(sub,v,objEng,cat,pol){
+  const base=v.eng[0],s=v.eng[1],past=v.eng[2],ger=v.eng[3];
+  const S=sub[2],p=sub[3]; const o=objEng?(' '+objEng):'';
+  if(cat==='present'){ if(pol==='aff') return S+' '+(p==='3sg'?s:base)+o; return S+' '+(p==='3sg'?'doesn’t':'don’t')+' '+base+o; }
+  if(cat==='future'){ return pol==='aff'?S+' will '+base+o:S+' won’t '+base+o; }
+  if(cat==='past'){ return pol==='aff'?S+' '+past+o:S+' didn’t '+base+o; }
+  const be=p==='1sg'?'am':(p==='3sg'?'is':'are');
+  if(pol==='aff') return S+' '+be+' '+ger+o;
+  const neg=p==='1sg'?'am not':(p==='3sg'?'isn’t':'aren’t');
+  return S+' '+neg+' '+ger+o;
+}
+function cprogVar(r){ return r.replace('teimasu','temasu').replace('teimasen','temasen').replace('teiru','teru').replace('teinai','tenai'); }
+function genCard(vi,si,cat,pol,reg,oi,ti){
+  const v=CV[vi], sub=CS[si]; const F=cforms(v); const ff=F[cfk(cat,pol,reg)]; const vk=ff[0],vr=ff[1];
+  const time=CT[cat][ti];
+  let obj=null; if(v.objs.length) obj=v.objs[oi % v.objs.length];
+  let kana=[sub[0]+'は',time[0]]; let rom=[sub[1],'wa',time[1]];
+  if(obj){ kana.push(obj[0]+v.pk); rom.push(obj[1]); rom.push(v.pr); }
+  kana.push(vk); rom.push(vr);
+  const ansR=rom.join(' '), ansK=kana.join(' ');
+  const eng=ceng(sub,v,obj?obj[2]:'',cat,pol)+' '+time[2]+'.';
+  const accepts=[ansR]; const alt=cprogVar(ansR); if(alt!==ansR) accepts.push(alt);
+  return {eng:eng,ansR:ansR,ansK:ansK,accepts:accepts,reg:reg,verb:v.k};
+}
+function rint(n){ return Math.floor(Math.random()*n); }
+function cReg(){ return Math.random()<0.5?'polite':'plain'; }
+function randomCard(pool){
+  const vi=pool[rint(pool.length)]; const si=rint(CS.length);
+  const cat=['present','future','past','progressive'][rint(4)];
+  const pol=Math.random()<0.5?'aff':'neg'; const reg=cReg();
+  const oi=rint(Math.max(1,CV[vi].objs.length)); const ti=rint(CT[cat].length);
+  return genCard(vi,si,cat,pol,reg,oi,ti);
+}
+function renderConjVerbs(){
+  const box=$('conjverbs'); if(!box) return; box.innerHTML='';
+  CV.forEach((v,i)=>{
+    const on=conjChecks[i];
+    const row=document.createElement('div');
+    row.className='topic'+(on?' sel':'');
+    row.innerHTML='<span class="mark">'+(on?'✓':'')+'</span><span><span class="tn">'+v.eng[0]+'</span><br><span class="tj jp">'+v.k+'</span></span>';
+    row.addEventListener('click',()=>{ conjChecks[i]=!conjChecks[i]; row.classList.toggle('sel',conjChecks[i]); row.querySelector('.mark').textContent=conjChecks[i]?'✓':''; });
+    box.appendChild(row);
+  });
+}
+function selectedConjVerbs(){ const p=[]; conjChecks.forEach((b,i)=>{ if(b) p.push(i); }); return p; }
+function buildCQueue(pool,n){ const q=[]; for(let i=0;i<n;i++) q.push({c:randomCard(pool),st:'p',given:'',score:0}); return q; }
+function startConjPool(pool){
+  const n=parseInt($('length').value,10)||0;
+  cqueue=buildCQueue(pool, n>0?n:20); cpos=0; cscore=0;
+  ['menu','quiz','results','kquiz','kresults','cresults'].forEach(id=>$(id).classList.add('hidden'));
+  $('cquiz').classList.remove('hidden'); showCQuestion();
+}
+$('startConj').onclick=()=>{ const pool=selectedConjVerbs(); if(!pool.length){ alert('Pick at least one verb above, or use 🎲 All random.'); return; } startConjPool(pool); };
+$('conjRandom').onclick=()=>startConjPool(CV.map((_,i)=>i));
+function cAnsweredCount(){ return cqueue.reduce((n,e)=>n+(e.st==='a'?1:0),0); }
+function cNextPending(from){ const N=cqueue.length; for(let k=1;k<=N;k++){ const i=(from+k)%N; if(cqueue[i].st==='p') return i; } return -1; }
+function showCQuestion(){
+  const e=cqueue[cpos], c=e.c; canswered=e.st==='a';
+  const done=cAnsweredCount();
+  $('cqcount').textContent='Sentence '+(cpos+1)+' of '+cqueue.length+'  ·  '+done+' answered';
+  $('cqscore').textContent=fmt(cscore);
+  $('cqbar').style.width=(done/cqueue.length*100)+'%';
+  $('csent').textContent=c.eng;
+  const reg=$('creg'); reg.textContent=c.reg==='polite'?'polite':'casual'; reg.className='creg '+(c.reg==='polite'?'polite':'casual');
+  const inp=$('cinput'); $('cqfeedback').innerHTML='';
+  if(canswered){ inp.value=e.given==='(shown)'?'':e.given; inp.disabled=true; renderCFeedback(); $('cqsubmit').classList.add('hidden'); $('cqshow').classList.add('hidden'); $('cqnext').classList.remove('hidden'); $('cqnext').focus(); }
+  else { inp.value=''; inp.disabled=false; inp.focus(); $('cqsubmit').classList.remove('hidden'); $('cqshow').classList.remove('hidden'); $('cqnext').classList.add('hidden'); }
+  $('cqback').disabled=cpos===0;
+}
+function cCheck(forceZero){
+  const e=cqueue[cpos]; if(e.st==='a') return;
+  const val=$('cinput').value;
+  let s=forceZero?0:gradeRomaji(val,e.c.accepts);
+  e.st='a'; e.given=forceZero?'(shown)':val; e.score=s; cscore+=s; canswered=true;
+  $('cqscore').textContent=fmt(cscore);
+  $('cqbar').style.width=(cAnsweredCount()/cqueue.length*100)+'%';
+  $('cqcount').textContent='Sentence '+(cpos+1)+' of '+cqueue.length+'  ·  '+cAnsweredCount()+' answered';
+  $('cinput').disabled=true;
+  $('cqsubmit').classList.add('hidden'); $('cqshow').classList.add('hidden'); $('cqnext').classList.remove('hidden');
+  renderCFeedback(); $('cqnext').focus();
+}
+function cSetMark(s){ const e=cqueue[cpos]; if(e.st!=='a') return; cscore+=(s-e.score); e.score=s; $('cqscore').textContent=fmt(cscore); renderCFeedback(); $('cqnext').focus(); }
+function renderCFeedback(){
+  const e=cqueue[cpos], c=e.c, cs=e.score;
+  const cls=cs===1?'good':cs===0.5?'half':'bad';
+  const word=cs===1?'Correct!':cs===0.5?'Half credit':'Not quite';
+  const icon=cs===1?'✓':cs===0.5?'◐':'✗';
+  $('cqfeedback').innerHTML='<div class="fb '+cls+'">'+
+    '<div class="verdict">'+icon+' '+word+' &nbsp;<span style="font-weight:500;color:var(--muted)">+'+fmt(cs)+'</span> &nbsp;<span style="font-size:12px;color:var(--muted)">('+(c.reg==='polite'?'polite':'casual')+')</span></div>'+
+    '<div class="detail">'+c.eng+'<br><span class="ja jp">'+c.ansK+'</span> &nbsp; <b>'+c.ansR+'</b></div>'+
+    '<div class="adjust"><span class="lbl">Override:</span>'+
+      '<button class="mk full'+(cs===1?' on':'')+'" data-s="1">✓ Full</button>'+
+      '<button class="mk half'+(cs===0.5?' on':'')+'" data-s="0.5">◐ Half</button>'+
+      '<button class="mk zero'+(cs===0?' on':'')+'" data-s="0">✗ Wrong</button>'+
+    '</div></div>';
+  $('cqfeedback').querySelectorAll('.adjust .mk').forEach(b=>b.onclick=()=>cSetMark(parseFloat(b.dataset.s)));
+}
+function cAdvance(){ const ni=cNextPending(cpos); if(ni===-1){ showCResults(); return; } cpos=ni; showCQuestion(); }
+function cGoBack(){ if(cpos>0){ cpos--; showCQuestion(); } }
+function cGoFwd(){ if(cpos<cqueue.length-1){ cpos++; showCQuestion(); } else { cAdvance(); } }
+$('cqsubmit').onclick=()=>cCheck(false);
+$('cqshow').onclick=()=>cCheck(true);
+$('cqnext').onclick=cAdvance;
+$('cqback').onclick=cGoBack;
+$('cqfwd').onclick=cGoFwd;
+$('cqquit').onclick=()=>{ if(cAnsweredCount()) showCResults(); else backToMenu(); };
+document.addEventListener('keydown',e=>{ if($('cquiz').classList.contains('hidden')) return; if(e.key==='Enter'){ e.preventDefault(); if(!canswered) cCheck(false); else cAdvance(); } });
+function showCResults(){
+  $('cquiz').classList.add('hidden'); $('cresults').classList.remove('hidden');
+  const done=cqueue.filter(e=>e.st==='a'); const n=done.length, pct=n?Math.round(cscore/n*100):0;
+  $('crScore').textContent=fmt(cscore)+' / '+n;
+  $('crSub').textContent=pct+'%  ·  '+done.filter(e=>e.score===1).length+' correct, '+done.filter(e=>e.score===0.5).length+' half, '+done.filter(e=>e.score===0).length+' missed';
+  $('crBar').style.width=pct+'%'; $('crEmoji').textContent=pct>=90?'🎉':pct>=70?'😃':pct>=50?'🙂':'💪';
+  const tb=$('crTable'); tb.innerHTML='';
+  done.forEach((e,i)=>{ const c=e.c; const cls=e.score===1?'full':e.score===0.5?'half':'zero';
+    const giv=(e.given&&e.given!=='(shown)')?e.given:'—'; const gc=e.score===1?'ok':e.score===0?'miss':'';
+    const tr=document.createElement('tr'); tr.className=cls;
+    tr.innerHTML='<td>'+(i+1)+'</td><td>'+c.eng+' <span style="color:var(--muted)">('+(c.reg==='polite'?'pol':'cas')+')</span></td><td class="'+gc+'">'+giv+'</td><td><b>'+c.ansR+'</b><br><span class="jp" style="color:var(--muted)">'+c.ansK+'</span></td><td>'+fmt(e.score)+'</td>';
+    tb.appendChild(tr); });
+}
+$('crMenu').onclick=backToMenu;
+$('crAgain').onclick=()=>{ cqueue=shuffle(cqueue.map(e=>({c:e.c,st:'p',given:'',score:0}))); cpos=0; cscore=0; ['menu','quiz','results','kquiz','kresults','cresults'].forEach(id=>$(id).classList.add('hidden')); $('cquiz').classList.remove('hidden'); showCQuestion(); };
+$('crWrong').onclick=()=>{ const miss=cqueue.filter(e=>e.st==='a'&&e.score<1).map(e=>e.c); if(!miss.length){ alert('Nothing missed — perfect round!'); return; } cqueue=shuffle(miss.map(c=>({c,st:'p',given:'',score:0}))); cpos=0; cscore=0; ['menu','quiz','results','kquiz','kresults','cresults'].forEach(id=>$(id).classList.add('hidden')); $('cquiz').classList.remove('hidden'); showCQuestion(); };
+function buildCResultsText(){
+  const done=cqueue.filter(e=>e.st==='a'); const n=done.length, pct=n?Math.round(cscore/n*100):0;
+  const bad=done.filter(e=>e.score<1);
+  const line=e=>'- '+e.c.eng+' = '+e.c.ansR+' ('+(e.c.reg==='polite'?'polite':'casual')+')'+(e.given&&e.given!=='(shown)'?' — I typed “'+e.given+'”':' — Show answer');
+  let t='My Japanese conjugation drill (sentences) — '+new Date().toLocaleString()+'\n';
+  t+='Score: '+fmt(cscore)+' / '+n+' ('+pct+'%)\n';
+  if(bad.length) t+='\nNeed work ('+bad.length+'):\n'+bad.map(line).join('\n')+'\n'; else t+='\nPerfect round!\n';
+  t+='\nClaude, drill me on these sentence conjugations.';
+  return t;
+}
+$('crSend').onclick=async ()=>{ const b=$('crSend'); const txt=buildCResultsText(); let ok=false;
+  if(window.cowork&&window.cowork.callMcpTool){ try{ const r=await window.cowork.callMcpTool('mcp__cowork__send_user_message',{message:txt}); ok=!(r&&r.isError);}catch(err){ok=false;} }
+  if(ok) b.textContent='Sent to the chat ✓';
+  else{ try{ await navigator.clipboard.writeText(txt); b.textContent='Copied — paste it to Claude ✓'; }catch(err){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.cssText='width:100%;height:170px;margin-top:10px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit'; b.closest('.card').appendChild(ta); ta.select(); b.textContent='Copy the text below'; } }
+  setTimeout(()=>{ b.textContent='Send results to Claude'; },4000);
+};
+renderConjVerbs();
+/* ============ END CONJUGATION QUIZ ============ */
+
+/* init */
+$('optWords').addEventListener('click',()=>{wordsOnly=!wordsOnly;try{localStorage.setItem('jq_words',wordsOnly?'1':'0');}catch(e){}const o=$('optWords');o.classList.toggle('sel',wordsOnly);o.querySelector('.mark').textContent=wordsOnly?'✓':'';renderTopics();renderBatches();updatePool();});
+$('qHintToggle').addEventListener('click',()=>{showHint=!showHint;const e=$('qHintToggle');e.classList.toggle('on',showHint);e.querySelector('.hbox').textContent=showHint?'✓':'';const q=queue[pos];if(q){const _dir=q.mode==='j2e'?'Japanese → English':'English → Japanese';$('qtopic').textContent=showHint?(_dir+'  ·  '+TOPIC_BY_ID[q.it.t].en):_dir;}});
+function syncOptRow(id,on){ const o=$(id); if(o){ o.classList.toggle('sel',on); o.querySelector('.mark').textContent=on?'✓':''; } }
+syncOptRow('optWords',wordsOnly); syncOptRow('optSmart',smartMode);
+$('optSmart').addEventListener('click',()=>{smartMode=!smartMode;try{localStorage.setItem('jq_smart',smartMode?'1':'0');}catch(e){}syncOptRow('optSmart',smartMode);});
+let _rstArm=false;
+$('statReset').addEventListener('click',e=>{
+  e.preventDefault();
+  const a=$('statReset');
+  if(!_rstArm){ _rstArm=true; a.textContent='click again to confirm reset'; setTimeout(()=>{_rstArm=false;a.textContent='reset smart-review memory';},4000); }
+  else{ STATS={}; saveStats(); _rstArm=false; a.textContent='memory cleared ✓'; setTimeout(()=>{a.textContent='reset smart-review memory';},3000); }
+});
+renderTopics(); renderBatches(); updatePool();
+</script>
+</body>
+</html>
