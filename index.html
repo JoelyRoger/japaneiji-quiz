@@ -146,8 +146,14 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-
       </div>
       <div class="topics" id="topics" style="margin-top:12px"></div>
 
-      <div class="section-title">When added</div>
-      <div class="topics" id="batches"></div>
+      <div class="row spread" style="margin-top:22px">
+        <div class="section-title" style="margin:0">When added</div>
+        <div class="row">
+          <button class="btn ghost sm" id="batchAll">Add all</button>
+          <button class="btn ghost sm" id="batchNone">Clear all</button>
+        </div>
+      </div>
+      <div class="topics" id="batches" style="margin-top:12px"></div>
 
       <div class="section-title">Direction</div>
       <div class="seg" id="dirSeg">
@@ -874,6 +880,8 @@ function updatePool(){
 }
 $('selAll').onclick=()=>{TOPICS.forEach(t=>checks[t.id]=true);renderTopics();updatePool();};
 $('selNone').onclick=()=>{TOPICS.forEach(t=>checks[t.id]=false);renderTopics();updatePool();};
+$('batchAll').onclick=()=>{BATCHES.forEach(b=>batchSel[b.id]=true);renderBatches();renderTopics();updatePool();};
+$('batchNone').onclick=()=>{BATCHES.forEach(b=>batchSel[b.id]=false);renderBatches();renderTopics();updatePool();};
 document.querySelectorAll('#dirSeg label').forEach(l=>{
   l.addEventListener('click',()=>{
     document.querySelectorAll('#dirSeg label').forEach(x=>x.classList.remove('on'));
